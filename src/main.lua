@@ -10,8 +10,8 @@ local ModEngine = require("modEngine")
 
 local boardWidth = 3
 local padding = 50
-local tileWidth = 100
-local windowDimensions = {boardWidth*100 + 100,boardWidth*100 + 150}
+local tileWidth = 200
+local windowDimensions = {boardWidth*tileWidth + 100,boardWidth*tileWidth + 150}
 
 local game = TicTacToe()
 local eventHandler = EventHandler()
