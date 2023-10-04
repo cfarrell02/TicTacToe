@@ -42,9 +42,9 @@ Note, the above is guidance only.  Feel free to highlight where you feel you hav
 
 Please fill in the following information and `commit` and `push`
 
-* Student Number:
-* Name: 
-* GitHub username: 
+* Student Number: 20094046    
+* Name: Cian Farrell
+* GitHub username: cfarrell02
 
 ## Installing
 
