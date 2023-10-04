@@ -7,7 +7,7 @@ local TicTacToe = class.TicTacToe()
 function TicTacToe:_init()
     self.board = {}
     self.playerOne = "X"
-    self.playerTwo = "Y"
+    self.playerTwo = "O"
     self.currentPlayer = self.playerOne
 end
 
@@ -39,12 +39,42 @@ function TicTacToe:switchPlayer()
 end
 
 function TicTacToe:checkWin()
-    -- Check for a win condition (row, column, diagonal)
-    -- Return the winning player ("X" or "O") or nil if no winner yet
+    for i = 1, 3 do
+        -- Check rows
+        if self.board[i] and self.board[i][1] and self.board[i][1] == self.board[i][2] and self.board[i][1] == self.board[i][3] then
+            return self.board[i][1]
+        end
+
+        -- Check columns
+        if self.board[1] and self.board[2] and self.board[3] and self.board[1][i] and self.board[1][i] == self.board[2][i] and self.board[1][i] == self.board[3][i] then
+            return self.board[1][i]
+        end
+
+    end
+ -- Check diagonals
+    for i = 1, 3 do 
+        if not self.board[i] then
+            return false
+        end
+    end
+    if self.board[1][1] and self.board[1][1] == self.board[2][2] and self.board[1][1] == self.board[3][3] then
+        return self.board[1][1]
+    end
+    if self.board[1][3] and self.board[1][3] == self.board[2][2] and self.board[1][3] == self.board[3][1] then
+        return self.board[1][3]
+    end
 end
 
 function TicTacToe:isFull()
-    -- Check if the board is full
+    for i = 1, 3 do
+        for j = 1, 3 do
+            if not self.board[i] or not self.board[i][j] then
+                return false
+            end
+        end
+    end
+
+    return true
 end
 
 function TicTacToe:printBoard()
