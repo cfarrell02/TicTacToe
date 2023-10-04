@@ -3,74 +3,90 @@
 local TicTacToe = require("src/game")
 local EventHandler = require("src/eventHandler")
 local ModEngine = require("src/modEngine")
+--Game properties
 
-local text = "Hello World!"
+local boardWidth = 3
+local padding = 50
+local tileWidth = 100
+local windowDimensions = {boardWidth*100 + 100,boardWidth*100 + 150}
+
+local game = TicTacToe()
+local eventHandler = EventHandler()
+-- local modEngine = ModEngine(game)
+-- modEngine:applyMods() -- i didn't lose 30 mins with a . here instead of a :
+local winner = nil
+
+local screenText = "Tic Tac Toe"
 
 --Love.load function
 
 function love.load(args)
     love.window.setTitle("Tic Tac Toe")
     --Set size to 300x300
-    love.window.setMode(400,400)
+    love.window.setMode(windowDimensions[1], windowDimensions[2], {resizable=false, vsync=false})
 end
 
 
 function love.update(dt)
-    local game = TicTacToe()
-    local eventHandler = EventHandler()
-    local modEngine = ModEngine(game)
-    modEngine:applyMods() -- i didn't lose 30 mins with a . here instead of a :
-    local winner = nil
-    text = os.clock()
 
+-- check for win
+    winner = game:checkWin()
+    if winner then
+        screenText = winner .. " wins!"
+    end
+
+    -- check for draw
+    if game:isFull() then
+        screenText = "Draw!"
+    end
     
 end
 
 function love.draw()
     --Drawing the board
-    love.graphics.line(150,50,150,350)
-    love.graphics.line(250,50,250,350)
-    love.graphics.line(50,150,350,150)
-    love.graphics.line(50,250,350,250)
+    for i = 1 , boardWidth-1 do
+        for j = 1 , boardWidth-1 do
+            love.graphics.line(padding + (i)*tileWidth, padding, padding + (i)*tileWidth, padding + tileWidth*boardWidth)
+            love.graphics.line(padding, padding + (j)*tileWidth, padding + tileWidth*boardWidth, padding + (j)*tileWidth)
+        end
+    end
+    love.graphics.print (screenText, windowDimensions[1]/2 - string.len(screenText)*3, windowDimensions[2] - 50)
 
-    love.graphics.print(text, 100, 100)
+    --Drawing the X's and O's
+
+    local board = game.board
+
+    for i = 1, boardWidth do
+        for j = 1, boardWidth do
+            if board[i] and board[i][j] then
+                if board[i][j] == "X" then
+                    love.graphics.line(padding + (j-1)*tileWidth + 10, padding + (i-1)*tileWidth + 10, padding + j*tileWidth - 10, padding + i*tileWidth - 10)
+                    love.graphics.line(padding + (j-1)*tileWidth + 10, padding + i*tileWidth - 10, padding + j*tileWidth - 10, padding + (i-1)*tileWidth + 10)
+                elseif board[i][j] == "O" then
+                    love.graphics.circle("line", padding + (j-1)*tileWidth + tileWidth/2, padding + (i-1)*tileWidth + tileWidth/2, tileWidth/2 - 10)
+                end
+            end
+        end
+    end
 end
 
--- function main()
---     local game = TicTacToe()
---     local eventHandler = EventHandler()
---     local modEngine = ModEngine(game)
---     modEngine:applyMods() -- i didn't lose 30 mins with a . here instead of a :
---     local winner = nil
-
---     while not winner and not game:isFull() do
---         print("Current Player: " .. game.currentPlayer)
---         game:printBoard()
-        
---         -- Get user input for row and column
---         print("Enter row (1-3) and column (1-3): ")
---         local row, col = tonumber(io.read()), tonumber(io.read())
-        
---         if row and col and row >= 1 and row <= 3 and col >= 1 and col <= 3 then
---             if game:makeMove(row, col) then
---                 eventHandler:raise("move", {col=col, row=row, valid=true})
---                 winner = game:checkWin()
---             else
---                 print("Invalid move. Try again.")
---                 eventHandler:raise("move", {col=col, row=row, valid=false})
---             end
---         else
---             print("Invalid input. Please enter valid row and column numbers (1-3).")
---         end
---     end
-
---     game:printBoard()
-
---     if winner then
---         print("Player " .. winner .. " wins!")
---     else
---         print("It's a draw!")
---     end
--- end
+-- Mouse click
+function love.mousepressed(x, y, button, istouch, presses)
+    if button == 1 then
+        local row = math.floor((y-padding)/tileWidth) + 1
+        local col = math.floor((x-padding)/tileWidth) + 1
+        if row and col and row >= 1 and row <= boardWidth and col >= 1 and col <= boardWidth then
+            if game:makeMove(row, col) then
+                eventHandler:raise("move", {col=col, row=row, valid=true})
+                winner = game:checkWin()
+            else
+                print("Invalid move. Try again.")
+                eventHandler:raise("move", {col=col, row=row, valid=false})
+            end
+        else
+            print("Invalid input. Please enter valid row and column numbers (1-3).")
+        end
+    end
+end
 
 -- main()

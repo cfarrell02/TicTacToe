@@ -77,30 +77,6 @@ function TicTacToe:isFull()
     return true
 end
 
-function TicTacToe:printBoard()
-    -- Print the current state of the board
-    local board = self.board
-
-    -- Print the column headers
-    print("  1 2 3")
-
-    for i = 1, 3 do
-        io.write(i .. " ")
-        for j = 1, 3 do
-            local cell = board[i] and board[i][j] or " "
-            io.write(cell)
-            if j < 3 then
-                io.write(" | ")
-            end
-        end
-        print()
-
-        if i < 3 then
-            print("  ---------")
-        end
-    end
-end
-
 -- if we have 
 function TicTacToe:setPlayerIcons(playerOneIcon, playerTwoIcon)
     self.playerOne = playerOneIcon
