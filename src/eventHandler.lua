@@ -1,6 +1,6 @@
 -- Load Penlight's class module
 local class = require("pl.class")
-local Event = require("src/event")
+local Event = require("event")
 
 -- Define the TicTacToe class
 local EventHandler = class.EventHandler()

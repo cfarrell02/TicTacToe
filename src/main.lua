@@ -1,8 +1,11 @@
 -- main.lua
+-- Modify package.path to include your custom directory
+package.path = package.path .. ";/opt/homebrew/Cellar/luarocks/3.9.2/share/lua/5.4/?.lua"
 
-local TicTacToe = require("src/game")
-local EventHandler = require("src/eventHandler")
-local ModEngine = require("src/modEngine")
+
+local TicTacToe = require("game")
+local EventHandler = require("eventHandler")
+local ModEngine = require("modEngine")
 --Game properties
 
 local boardWidth = 3
