@@ -12,12 +12,12 @@ local Splashscreen = require("splashscreen")
 local boardWidth = 3
 local padding = 50
 local tileWidth = 200
-windowDimensions = { boardWidth * tileWidth + 100, boardWidth * tileWidth + 150 }
 local screenText = "Tic Tac Toe"
 local winner = nil
+windowDimensions = { boardWidth * tileWidth + 100, boardWidth * tileWidth + 150 }
 
 -- Initialize game-related objects
-local game = TicTacToe()
+local game = TicTacToe(boardWidth)
 local eventHandler = EventHandler()
 local splashscreen = Splashscreen()
 

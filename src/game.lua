@@ -4,7 +4,8 @@ local class = require("pl.class")
 -- Define the TicTacToe class
 local TicTacToe = class.TicTacToe()
 
-function TicTacToe:_init()
+function TicTacToe:_init(boardSize)
+    self.boardSize = boardSize or 3
     self.board = {}
     self.playerOne = "X"
     self.playerTwo = "O"
@@ -39,7 +40,7 @@ function TicTacToe:switchPlayer()
 end
 
 function TicTacToe:checkWin()
-    for i = 1, 3 do
+    for i = 1, self.boardSize do
         -- Check rows
         if self.board[i] and self.board[i][1] and self.board[i][1] == self.board[i][2] and self.board[i][1] == self.board[i][3] then
             return self.board[i][1]
@@ -52,7 +53,7 @@ function TicTacToe:checkWin()
 
     end
  -- Check diagonals
-    for i = 1, 3 do 
+    for i = 1, self.boardSize do 
         if not self.board[i] then
             return false
         end
