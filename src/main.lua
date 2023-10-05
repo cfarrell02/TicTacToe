@@ -7,6 +7,8 @@ package.path = package.path .. ";/opt/homebrew/Cellar/luarocks/3.9.2/share/lua/5
 local TicTacToe = require("game")
 local EventHandler = require("eventHandler")
 local Splashscreen = require("splashscreen")
+local GameOverScreen = require("gameoverscreen")
+local socket = require('socket')
 
 -- Game properties
 local boardWidth = 3
@@ -16,23 +18,33 @@ local screenText = "Tic Tac Toe"
 local winner = nil
 windowDimensions = { boardWidth * tileWidth + 100, boardWidth * tileWidth + 150 }
 
+
+local gameOverTimer = 0
+local gameOverDelay = 1 -- Adjust this value to set the delay in seconds
+
 -- Initialize game-related objects
 local game = TicTacToe(boardWidth)
 local eventHandler = EventHandler()
 local splashscreen = Splashscreen()
+local gameOverScreen = GameOverScreen()
 
 -- Love.load function
 function love.load(args)
     love.window.setTitle("Tic Tac Toe")
     love.window.setMode(windowDimensions[1], windowDimensions[2], { resizable = false, vsync = false })
-    love.graphics.setBackgroundColor(0, 0.357, 0.91)
+    love.graphics.setBackgroundColor(0.208, 0.6, 0.941)
 end
 
 -- Love.update function
 function love.update(dt)
     splashscreen:update(dt)
 
+    if love.keyboard.isDown("escape") then
+        splashscreen.gameStarted = false
+    end
+
     if splashscreen.gameStarted then
+        gameOverScreen:update(dt)
         updateGame(dt)
     end
 end
@@ -42,9 +54,15 @@ function love.draw()
     splashscreen:draw()
 
     if splashscreen.gameStarted then
-
         -- Draw the game board and elements
-        drawGame()
+        if gameOverScreen.isShown then
+            gameOverScreen:draw()
+        else
+            drawGame()
+        end
+        local fontSize = 20
+        love.graphics.setFont(love.graphics.newFont(fontSize))
+        love.graphics.print(screenText, windowDimensions[1] / 2 - string.len(screenText) * fontSize * 0.3, windowDimensions[2] - 50)
     end
 end
 
@@ -78,10 +96,6 @@ function drawGame()
         end
     end
 
-    local fontSize = 20
-    love.graphics.setFont(love.graphics.newFont(fontSize))
-    love.graphics.print(screenText, windowDimensions[1] / 2 - string.len(screenText) * fontSize * 0.3, windowDimensions[2] - 50)
-
     -- Drawing the X's and O's
     local board = game.board
 
@@ -104,8 +118,20 @@ function updateGame(dt)
     winner = game:checkWin()
 
     if winner then
-        screenText = winner .. " wins!"
+        gameOverTimer = gameOverTimer + dt
+        if gameOverTimer >= gameOverDelay then
+            gameOverTimer = 0
+            gameOverScreen:show(winner .. " wins!")
+            game:reset()
+        end
+
     elseif game:isFull() then
-        screenText = "Draw!"
+        gameOverTimer = gameOverTimer + dt
+        if gameOverTimer >= gameOverDelay then
+            gameOverTimer = 0
+            gameOverScreen:show("Draw!")
+            game:reset()
+        end
     end
 end
+

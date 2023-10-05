@@ -15,16 +15,18 @@ function Splashscreen:_init()
     -- Create background Xs and Os
     self.backgroundXs = {}
     self.backgroundOs = {}
-    for i = 1, 10 do
+    for i = 1, 20 do
         table.insert(self.backgroundXs, {
             x = love.math.random(0, windowDimensions[1]),
             y = love.math.random(0, windowDimensions[2]),
             speed = love.math.random(20, 50),
+            size = love.math.random(5, 30),
         })
         table.insert(self.backgroundOs, {
             x = love.math.random(0, windowDimensions[1]),
             y = love.math.random(0, windowDimensions[2]),
             speed = love.math.random(20, 50),
+            size = love.math.random(5, 20),
         })
     end
 end
@@ -38,33 +40,33 @@ function Splashscreen:draw()
 
     -- Draw Xs and Os as moving shapes in the background
     for _, x in ipairs(self.backgroundXs) do
-        love.graphics.line(x.x, x.y, x.x + 10, x.y + 10)
-        love.graphics.line(x.x, x.y + 10, x.x + 10, x.y)
-        x.x = x.x - x.speed * love.timer.getDelta()
-        if x.x < -5 then
-            x.x = windowDimensions[1] + 10
-            x.y = love.math.random(0, windowDimensions[2])
+        love.graphics.line(x.x, x.y, x.x + x.size, x.y + x.size)
+        love.graphics.line(x.x, x.y + x.size, x.x + x.size, x.y)
+        x.y = x.y + x.speed * love.timer.getDelta()
+        if x.y > windowDimensions[2] + x.size then
+            x.y = -x.size
+            x.x = love.math.random(0, windowDimensions[1])
         end
     end
 
     for _, o in ipairs(self.backgroundOs) do
-        love.graphics.circle("line", o.x, o.y, 5)
-        o.x = o.x - o.speed * love.timer.getDelta()
-        if o.x < -5 then
-            o.x = windowDimensions[1] + 10
-            o.y = love.math.random(0, windowDimensions[2])
+        love.graphics.circle("line", o.x, o.y, o.size)
+        o.y = o.y + o.speed * love.timer.getDelta()
+        if o.y > windowDimensions[2] + o.size then
+            o.y = -o.size
+            o.x = love.math.random(0, windowDimensions[1])
         end
     end
 
-    -- Display the title with a blinking effect
-    if self.showText then
+    -- Draw the title text    
         love.graphics.setFont(self.font)
         love.graphics.print(self.titleText, self.titleX, self.titleY)
-    end
-
-    -- Display "Press space to start" message
+    
+    --Blinking start text
+    if self.showText then
     love.graphics.setFont(love.graphics.newFont(windowDimensions[1] / 20))
     love.graphics.print("Press space to start", windowDimensions[1] / 2 - windowDimensions[1] * 0.25, windowDimensions[2] / 2 + 50)
+    end
 end
 
 function Splashscreen:update(dt)
