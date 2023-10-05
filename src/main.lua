@@ -14,7 +14,8 @@ local socket = require('socket')
 local boardWidth = 3
 local padding = 50
 local tileWidth = 200
-local screenText = "Tic Tac Toe"
+local screenText = ""
+local scoreText = ""
 local winner = nil
 windowDimensions = { boardWidth * tileWidth + 100, boardWidth * tileWidth + 150 }
 
@@ -33,6 +34,8 @@ function love.load(args)
     love.window.setTitle("Tic Tac Toe")
     love.window.setMode(windowDimensions[1], windowDimensions[2], { resizable = false, vsync = false })
     love.graphics.setBackgroundColor(0.208, 0.6, 0.941)
+    scoreText = string.format("X: %d | O: %d", game.score['X'], game.score['O'])
+    screenText = string.format("Player %s's turn", game.currentPlayer)
 end
 
 -- Love.update function
@@ -58,11 +61,16 @@ function love.draw()
         if gameOverScreen.isShown then
             gameOverScreen:draw()
         else
-            drawGame()
+            game:draw(padding, tileWidth)
         end
-        local fontSize = 20
-        love.graphics.setFont(love.graphics.newFont(fontSize))
-        love.graphics.print(screenText, windowDimensions[1] / 2 - string.len(screenText) * fontSize * 0.3, windowDimensions[2] - 50)
+        love.graphics.setFont(love.graphics.newFont(20))
+        love.graphics.print(screenText, windowDimensions[1] / 2 - string.len(screenText) * 6, windowDimensions[2] - 50)
+
+        -- Draw the score
+        love.graphics.setFont(love.graphics.newFont(16))
+        love.graphics.print(scoreText, windowDimensions[1] / 2 - string.len(scoreText) * 4, 10)
+
+
     end
 end
 
@@ -75,62 +83,46 @@ function love.mousepressed(x, y, button, istouch, presses)
         if row and col and row >= 1 and row <= boardWidth and col >= 1 and col <= boardWidth then
             if game:makeMove(row, col) then
                 eventHandler:raise("move", { col = col, row = row, valid = true })
+                screenText = string.format("Player %s's turn", game.currentPlayer)
                 winner = game:checkWin()
             else
-                print("Invalid move. Try again.")
+                screenText = "Invalid move!"
                 eventHandler:raise("move", { col = col, row = row, valid = false })
             end
         else
-            print("Invalid input. Please enter valid row and column numbers (1-3).")
+            screenText = "Invalid move!"
         end
     end
 end
 
--- Draw the game board and elements
-function drawGame()
-    -- Drawing the board grid
-    for i = 1, boardWidth - 1 do
-        for j = 1, boardWidth - 1 do
-            love.graphics.line(padding + i * tileWidth, padding, padding + i * tileWidth, padding + tileWidth * boardWidth)
-            love.graphics.line(padding, padding + j * tileWidth, padding + tileWidth * boardWidth, padding + j * tileWidth)
-        end
-    end
 
-    -- Drawing the X's and O's
-    local board = game.board
-
-    for i = 1, boardWidth do
-        for j = 1, boardWidth do
-            if board[i] and board[i][j] then
-                if board[i][j] == "X" then
-                    love.graphics.line(padding + (j - 1) * tileWidth + 10, padding + (i - 1) * tileWidth + 10, padding + j * tileWidth - 10, padding + i * tileWidth - 10)
-                    love.graphics.line(padding + (j - 1) * tileWidth + 10, padding + i * tileWidth - 10, padding + j * tileWidth - 10, padding + (i - 1) * tileWidth + 10)
-                elseif board[i][j] == "O" then
-                    love.graphics.circle("line", padding + (j - 1) * tileWidth + tileWidth / 2, padding + (i - 1) * tileWidth + tileWidth / 2, tileWidth / 2 - 10)
-                end
-            end
-        end
-    end
-end
 
 -- Update game state
 function updateGame(dt)
     winner = game:checkWin()
 
     if winner then
+        screenText = winner .. " wins!"
         gameOverTimer = gameOverTimer + dt
         if gameOverTimer >= gameOverDelay then
             gameOverTimer = 0
             gameOverScreen:show(winner .. " wins!")
+            eventHandler:raise("win", { winner = winner })
+            game:incrementScore(winner)
             game:reset()
+            scoreText = string.format("X: %d | O: %d", game.score['X'], game.score['O'])
+            screenText = "Tic Tac Toe"
         end
 
     elseif game:isFull() then
+        screenText = "Draw!"
         gameOverTimer = gameOverTimer + dt
         if gameOverTimer >= gameOverDelay then
             gameOverTimer = 0
             gameOverScreen:show("Draw!")
+            eventHandler:raise("draw")
             game:reset()
+            screenText = "Tic Tac Toe"
         end
     end
 end
