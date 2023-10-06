@@ -18,6 +18,10 @@ function TicTacToe:reset()
     self.currentPlayer = self.playerOne
 end
 
+function TicTacToe:resetScores()
+    self.score = { X = 0, O = 0 }
+end
+
 function TicTacToe:makeMove(row, col)
     if not self.board[row] then
         self.board[row] = {}

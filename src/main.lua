@@ -44,6 +44,11 @@ function love.update(dt)
 
     if love.keyboard.isDown("escape") then
         splashscreen.gameStarted = false
+        gameOverScreen.isShown = false
+        game:resetScores()
+        game:reset()
+        scoreText = string.format("X: %d | O: %d", game.score['X'], game.score['O'])
+        screenText = string.format("Player %s's turn", game.currentPlayer)
     end
 
     if splashscreen.gameStarted then
