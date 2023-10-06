@@ -76,21 +76,24 @@ end
 
 -- Mouse click
 function love.mousepressed(x, y, button, istouch, presses)
-    if button == 1 and splashscreen.gameStarted then
-        local row = math.floor((y - padding) / tileWidth) + 1
-        local col = math.floor((x - padding) / tileWidth) + 1
+    if not gameOverScreen.isShown and splashscreen.gameStarted then
+        
+        if button == 1 and splashscreen.gameStarted then
+            local row = math.floor((y - padding) / tileWidth) + 1
+            local col = math.floor((x - padding) / tileWidth) + 1
 
-        if row and col and row >= 1 and row <= boardWidth and col >= 1 and col <= boardWidth then
-            if game:makeMove(row, col) then
-                eventHandler:raise("move", { col = col, row = row, valid = true })
-                screenText = string.format("Player %s's turn", game.currentPlayer)
-                winner = game:checkWin()
+            if row and col and row >= 1 and row <= boardWidth and col >= 1 and col <= boardWidth then
+                if game:makeMove(row, col) then
+                    eventHandler:raise("move", { col = col, row = row, valid = true })
+                    screenText = string.format("Player %s's turn", game.currentPlayer)
+                    winner = game:checkWin()
+                else
+                    screenText = "Invalid move!"
+                    eventHandler:raise("move", { col = col, row = row, valid = false })
+                end
             else
                 screenText = "Invalid move!"
-                eventHandler:raise("move", { col = col, row = row, valid = false })
             end
-        else
-            screenText = "Invalid move!"
         end
     end
 end
