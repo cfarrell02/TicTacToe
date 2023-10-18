@@ -4,27 +4,26 @@ local Splashscreen = class.Splashscreen()
 
 function Splashscreen:_init()
     self.titleText = "Tic Tac Toe"
-    self.gameStarted = false
     self.animationTimer = 0
     self.blinkDuration = 1
     self.showText = true
-    self.font = love.graphics.newFont(windowDimensions[1] / 10)
-    self.titleX = (windowDimensions[1] - self.font:getWidth(self.titleText)) / 2
-    self.titleY = (windowDimensions[2] - self.font:getHeight()) / 2 - 50
+    self.font = love.graphics.newFont(WINDOWDIMENSIONS[1] / 10)
+    self.titleX = (WINDOWDIMENSIONS[1] - self.font:getWidth(self.titleText)) / 2
+    self.titleY = (WINDOWDIMENSIONS[2] - self.font:getHeight()) / 2 - 50
 
     -- Create background Xs and Os
     self.backgroundXs = {}
     self.backgroundOs = {}
     for i = 1, 20 do
         table.insert(self.backgroundXs, {
-            x = love.math.random(0, windowDimensions[1]),
-            y = love.math.random(0, windowDimensions[2]),
+            x = love.math.random(0, WINDOWDIMENSIONS[1]),
+            y = love.math.random(0, WINDOWDIMENSIONS[2]),
             speed = love.math.random(20, 50),
             size = love.math.random(5, 30),
         })
         table.insert(self.backgroundOs, {
-            x = love.math.random(0, windowDimensions[1]),
-            y = love.math.random(0, windowDimensions[2]),
+            x = love.math.random(0, WINDOWDIMENSIONS[1]),
+            y = love.math.random(0, WINDOWDIMENSIONS[2]),
             speed = love.math.random(20, 50),
             size = love.math.random(5, 20),
         })
@@ -32,7 +31,7 @@ function Splashscreen:_init()
 end
 
 function Splashscreen:draw()
-    if self.gameStarted then
+    if GAMESTATE == "playing" then
         return
     end
 
@@ -43,18 +42,18 @@ function Splashscreen:draw()
         love.graphics.line(x.x, x.y, x.x + x.size, x.y + x.size)
         love.graphics.line(x.x, x.y + x.size, x.x + x.size, x.y)
         x.y = x.y + x.speed * love.timer.getDelta()
-        if x.y > windowDimensions[2] + x.size then
+        if x.y > WINDOWDIMENSIONS[2] + x.size then
             x.y = -x.size
-            x.x = love.math.random(0, windowDimensions[1])
+            x.x = love.math.random(0, WINDOWDIMENSIONS[1])
         end
     end
 
     for _, o in ipairs(self.backgroundOs) do
         love.graphics.circle("line", o.x, o.y, o.size)
         o.y = o.y + o.speed * love.timer.getDelta()
-        if o.y > windowDimensions[2] + o.size then
+        if o.y > WINDOWDIMENSIONS[2] + o.size then
             o.y = -o.size
-            o.x = love.math.random(0, windowDimensions[1])
+            o.x = love.math.random(0, WINDOWDIMENSIONS[1])
         end
     end
 
@@ -64,14 +63,24 @@ function Splashscreen:draw()
     
     --Blinking start text
     if self.showText then
-    love.graphics.setFont(love.graphics.newFont(windowDimensions[1] / 20))
-    love.graphics.print("Press space to start", windowDimensions[1] / 2 - windowDimensions[1] * 0.25, windowDimensions[2] / 2 + 50)
+    love.graphics.setFont(love.graphics.newFont(WINDOWDIMENSIONS[1] / 20))
+    love.graphics.print("Press space to start", WINDOWDIMENSIONS[1] / 2 - WINDOWDIMENSIONS[1] * 0.25, WINDOWDIMENSIONS[2] / 2 + 50)
     end
+
+    love.graphics.setFont(love.graphics.newFont(16))
+    love.graphics.print("Press 1 for singleplayer and 2 for multiplayer", WINDOWDIMENSIONS[1] / 2 - WINDOWDIMENSIONS[1] * 0.25, WINDOWDIMENSIONS[2] / 2 + 100)
+    love.graphics.print(GAMEMODE, WINDOWDIMENSIONS[1] / 2 - WINDOWDIMENSIONS[1] * 0.25, WINDOWDIMENSIONS[2] / 2 + 150)
 end
 
 function Splashscreen:update(dt)
     if love.keyboard.isDown("space") then
-        self.gameStarted = true
+        GAMESTATE = "playing"
+    end
+    if love.keyboard.isDown("1") then
+        GAMEMODE = "Singleplayer"
+    end
+    if love.keyboard.isDown("2") then
+        GAMEMODE = "Multiplayer"
     end
 
     -- Blinking for the title text
