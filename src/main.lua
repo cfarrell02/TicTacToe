@@ -45,6 +45,7 @@ end
 -- Love.update function
 function love.update(dt)
     splashscreen:update(dt)
+    game:update(dt)
 
     if love.keyboard.isDown("escape") then
         GAMESTATE = "splashscreen"

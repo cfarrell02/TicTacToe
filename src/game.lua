@@ -23,6 +23,11 @@ function TicTacToe:resetScores()
 end
 
 function TicTacToe:makeMove(row, col)
+    --Do not make move if AI move is pending
+    if GAMEMODE == "Singleplayer" and self.currentPlayer == self.playerTwo and love.timer.getTime() < self.aiMoveTime then
+        return false
+    end
+
     if not self.board[row] then
         self.board[row] = {}
     end
@@ -35,9 +40,64 @@ function TicTacToe:makeMove(row, col)
         return false
     end
 end
+
+
+function TicTacToe:makeAIMove()
+    local emptyCells = {}
+    for i = 1, self.boardSize do
+        for j = 1, self.boardSize do
+            if not self.board[i] or not self.board[i][j] then
+                table.insert(emptyCells, {i, j})
+            end
+        end
+    end
+
+    if #emptyCells == 0 then
+        return false
+    end
+
+    -- Check for a winning move
+    for _, cell in ipairs(emptyCells) do
+        local row, col = unpack(cell)
+        self.board[row] = self.board[row] or {}
+        self.board[row][col] = self.currentPlayer
+        if self:checkWin(self.currentPlayer) then
+            self:switchPlayer()
+            return true
+        end
+        self.board[row][col] = nil
+    end
+
+    -- Check for a blocking move
+    local opponent = (self.currentPlayer == self.playerOne) and self.playerTwo or self.playerOne
+    for _, cell in ipairs(emptyCells) do
+        local row, col = unpack(cell)
+        self.board[row] = self.board[row] or {}
+        self.board[row][col] = opponent
+        if self:checkWin(opponent) then
+            self.board[row][col] = self.currentPlayer
+            self:switchPlayer()
+            return true
+        end
+        self.board[row][col] = nil
+    end
+
+    -- If there are no winning or blocking moves, make a random move
+    local randomIndex = love.math.random(1, #emptyCells)
+    local row, col = unpack(emptyCells[randomIndex])
+    self.board[row] = self.board[row] or {}
+    self.board[row][col] = self.currentPlayer
+    self:switchPlayer()
+    return true
+end
+
 function TicTacToe:switchPlayer()
     if self.currentPlayer == self.playerOne then
         self.currentPlayer = self.playerTwo
+        if GAMEMODE == "Singleplayer" then
+            -- Store the time when the AI should make a move
+            self.aiMoveTime = love.timer.getTime() + 2
+        end
     else
         self.currentPlayer = self.playerOne
     end
@@ -155,6 +215,14 @@ end
                     love.graphics.circle("line", padding + (j - 1) * tileWidth + tileWidth / 2, padding + (i - 1) * tileWidth + tileWidth / 2, tileWidth / 2 - 10)
                 end
             end
+        end
+    end
+end
+
+function TicTacToe:update(dt)
+    if GAMEMODE == "Singleplayer" and self.currentPlayer == self.playerTwo then
+        if love.timer.getTime() >= self.aiMoveTime then
+            self:makeAIMove()
         end
     end
 end
