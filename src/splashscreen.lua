@@ -68,20 +68,36 @@ function Splashscreen:draw()
     end
 
     love.graphics.setFont(love.graphics.newFont(16))
-    love.graphics.print("Press 1 for singleplayer and 2 for multiplayer", WINDOWDIMENSIONS[1] / 2 - WINDOWDIMENSIONS[1] * 0.25, WINDOWDIMENSIONS[2] / 2 + 100)
+    love.graphics.print("Press 's' for singleplayer or 'm' for multiplayer", WINDOWDIMENSIONS[1] / 2 - WINDOWDIMENSIONS[1] * 0.25, WINDOWDIMENSIONS[2] / 2 + 100)
     love.graphics.print(GAMEMODE, WINDOWDIMENSIONS[1] / 2 - WINDOWDIMENSIONS[1] * 0.25, WINDOWDIMENSIONS[2] / 2 + 150)
+    --Board width change text 
+    love.graphics.print("Press '1' for 3x3 board, '2' for 4x4 board, '3' for 5x5 board", WINDOWDIMENSIONS[1] / 2 - WINDOWDIMENSIONS[1] * 0.25, WINDOWDIMENSIONS[2] / 2 + 200)
+    love.graphics.print(BOARDWIDTH, WINDOWDIMENSIONS[1] / 2 - WINDOWDIMENSIONS[1] * 0.25, WINDOWDIMENSIONS[2] / 2 + 250)
 end
 
 function Splashscreen:update(dt)
     if love.keyboard.isDown("space") then
         GAMESTATE = "playing"
     end
-    if love.keyboard.isDown("1") then
+    if love.keyboard.isDown("s") then
         GAMEMODE = "Singleplayer"
     end
-    if love.keyboard.isDown("2") then
+    if love.keyboard.isDown("m") then
         GAMEMODE = "Multiplayer"
     end
+    if love.keyboard.isDown("1") and BOARDWIDTH ~= 3 then
+        BOARDWIDTH = 3
+        RESETGAMEWIDTH()
+    end
+    if love.keyboard.isDown("2") and BOARDWIDTH ~= 4 then
+        BOARDWIDTH = 4
+        RESETGAMEWIDTH()
+    end
+    if love.keyboard.isDown("3") and BOARDWIDTH ~= 5 then
+        BOARDWIDTH = 5
+        RESETGAMEWIDTH()
+    end
+    
 
     -- Blinking for the title text
     self.animationTimer = self.animationTimer + dt

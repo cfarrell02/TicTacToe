@@ -11,7 +11,6 @@ local GameOverScreen = require("gameoverscreen")
 local socket = require('socket')
 
 -- Game properties
-local boardWidth = 3
 local padding = 50
 local tileWidth = 200
 local screenText = ""
@@ -19,7 +18,8 @@ local scoreText = ""
 local winner = nil
 
 --Global variables
-WINDOWDIMENSIONS = { boardWidth * tileWidth + 100, boardWidth * tileWidth + 150 }
+BOARDWIDTH = 3
+WINDOWDIMENSIONS = { BOARDWIDTH * tileWidth + 100, BOARDWIDTH * tileWidth + 150 }
 GAMESTATE = "splashscreen"
 GAMEMODE = "Singleplayer"
 
@@ -28,7 +28,7 @@ local gameOverTimer = 0
 local gameOverDelay = 1 -- Adjust this value to set the delay in seconds
 
 -- Initialize game-related objects
-local game = TicTacToe(boardWidth)
+local game = TicTacToe(BOARDWIDTH)
 local eventHandler = EventHandler()
 local splashscreen = Splashscreen()
 local gameOverScreen = GameOverScreen()
@@ -40,11 +40,16 @@ function love.load(args)
     love.graphics.setBackgroundColor(0.208, 0.6, 0.941)
     scoreText = string.format("X: %d | O: %d", game.score['X'], game.score['O'])
     screenText = string.format("Player %s's turn", game.currentPlayer)
+
+    
 end
 
 -- Love.update function
 function love.update(dt)
-    splashscreen:update(dt)
+    if GAMESTATE == "splashscreen" then
+        splashscreen:update(dt)
+        return
+    end
     game:update(dt)
 
     if love.keyboard.isDown("escape") then
@@ -96,7 +101,7 @@ function love.mousepressed(x, y, button, istouch, presses)
             local row = math.floor((y - padding) / tileWidth) + 1
             local col = math.floor((x - padding) / tileWidth) + 1
 
-            if row and col and row >= 1 and row <= boardWidth and col >= 1 and col <= boardWidth then
+            if row and col and row >= 1 and row <= BOARDWIDTH and col >= 1 and col <= BOARDWIDTH then
 
                 if game:makeMove(row, col) then
                     eventHandler:raise("move", { col = col, row = row, valid = true })
@@ -143,5 +148,12 @@ function updateGame(dt)
             screenText = "Tic Tac Toe"
         end
     end
+end
+
+--Global function for resetting game width
+RESETGAMEWIDTH = function()
+    WINDOWDIMENSIONS = { BOARDWIDTH * tileWidth + 100, BOARDWIDTH * tileWidth + 150 }
+    love.window.setMode(WINDOWDIMENSIONS[1], WINDOWDIMENSIONS[2], { resizable = false, vsync = false })
+    game = TicTacToe(BOARDWIDTH)
 end
 
