@@ -79,6 +79,7 @@ function love.draw()
         -- Draw the game board and elements
         if GAMESTATE == "gameover"  then
             gameOverScreen:draw()
+            return
         else
             game:draw(padding, tileWidth)
         end
@@ -90,12 +91,15 @@ function love.draw()
         love.graphics.print(scoreText, WINDOWDIMENSIONS[1] / 2 - string.len(scoreText) * 4, 10)
 
 
+
+
 end
 
 -- Mouse click
 function love.mousepressed(x, y, button, istouch, presses)
     
     if GAMESTATE == "playing" then
+        game:mousepressed(x, y, button)
         
         if button == 1 then
             local row = math.floor((y - padding) / tileWidth) + 1
@@ -108,20 +112,21 @@ function love.mousepressed(x, y, button, istouch, presses)
                     screenText = string.format("Player %s's turn", game.currentPlayer)
                     winner = game:checkWin()
                 else
-                    screenText = "Invalid move!"
                     eventHandler:raise("move", { col = col, row = row, valid = false })
                 end
             else
-                screenText = "Invalid move!"
             end
         end
-    end    
+    elseif GAMESTATE == "splashscreen" then
+        splashscreen:mousepressed(x, y, button)
+    end
 end
 
 
 
 -- Update game state
 function updateGame(dt)
+
     winner = game:checkWin()
 
     if winner then
@@ -150,10 +155,51 @@ function updateGame(dt)
     end
 end
 
+function highlightBox(x, y, width, height, color)
+    love.graphics.setColor(color)
+    love.graphics.rectangle("fill", x, y, width, height)
+    love.graphics.setColor(1, 1, 1)
+end
+
 --Global function for resetting game width
-RESETGAMEWIDTH = function()
+RESETGAMEWIDTH = function(width)
+    BOARDWIDTH = width
     WINDOWDIMENSIONS = { BOARDWIDTH * tileWidth + 100, BOARDWIDTH * tileWidth + 150 }
     love.window.setMode(WINDOWDIMENSIONS[1], WINDOWDIMENSIONS[2], { resizable = false, vsync = false })
     game = TicTacToe(BOARDWIDTH)
+    splashscreen = Splashscreen()
 end
 
+SETSCREENTEXT = function(text)
+    screenText = text
+end
+
+
+SAVEGAME = function ()
+    local file = io.open("savegame.txt", "w")
+    file:write(BOARDWIDTH .. "\n")
+    file:write(GAMEMODE .. "\n")
+    file:write(game.score['X'] .. "\n")
+    file:write(game.score['O'] .. "\n")
+    file:write(game.currentPlayer .. "\n")
+    file:write(game.board .. "\n")
+    file:close()
+end
+
+LOADGAME = function ()
+    local file = io.open("savegame.txt", "r")
+    if file then
+        BOARDWIDTH = tonumber(file:read())
+        WINDOWDIMENSIONS = { BOARDWIDTH * tileWidth + 100, BOARDWIDTH * tileWidth + 150 }
+        love.window.setMode(WINDOWDIMENSIONS[1], WINDOWDIMENSIONS[2], { resizable = false, vsync = false })
+        game = TicTacToe(BOARDWIDTH)
+        GAMEMODE = file:read()
+        game.score['X'] = tonumber(file:read())
+        game.score['O'] = tonumber(file:read())
+        game.currentPlayer = file:read()
+        game.board = file:read()
+        file:close()
+        scoreText = string.format("X: %d | O: %d", game.score['X'], game.score['O'])
+        screenText = string.format("Player %s's turn", game.currentPlayer)
+    end
+end

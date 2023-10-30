@@ -1,6 +1,11 @@
 local class = require("pl.class")
 
 local Splashscreen = class.Splashscreen()
+local EventHandler = require("eventHandler")
+
+local Button = require("button")
+local eventHandler = EventHandler()
+
 
 function Splashscreen:_init()
     self.titleText = "Tic Tac Toe"
@@ -10,6 +15,48 @@ function Splashscreen:_init()
     self.font = love.graphics.newFont(WINDOWDIMENSIONS[1] / 10)
     self.titleX = (WINDOWDIMENSIONS[1] - self.font:getWidth(self.titleText)) / 2
     self.titleY = (WINDOWDIMENSIONS[2] - self.font:getHeight()) / 2 - 50
+    self.buttons = {}
+
+    for i = 3, 5 do
+    local button = Button(
+        WINDOWDIMENSIONS[1] / 2 - 150 + 105*(i-3), -- x
+        WINDOWDIMENSIONS[2] -90, -- y
+        100, -- width
+        50, -- height
+        string.format("Grid Size %s", i), -- text
+        love.graphics.newFont(16), -- font
+        {0.58, 0.78, 0.92, 1}, -- light blue color
+        {0.31, 0, 0.4, 1}, -- hoverColor
+        {0.67, 0.63, 0.95, 1}, -- clickColor
+        function()
+            if BOARDWIDTH ~= i then
+                RESETGAMEWIDTH(i)
+            end
+        end
+    )
+    table.insert(self.buttons, button)    
+    end
+
+    -- Single/Multiplayer button
+    local button = Button(
+        WINDOWDIMENSIONS[1] / 2 - 50, -- x
+        WINDOWDIMENSIONS[2] / 2 + 150, -- y
+        100, -- width
+        50, -- height
+        GAMEMODE, -- text
+        love.graphics.newFont(16), -- font
+        {0.58, 0.78, 0.92, 1}, -- light blue color
+        {0.31, 0, 0.4, 1}, -- hoverColor
+        {0.67, 0.63, 0.95, 1}, -- clickColor
+        function()
+            if GAMEMODE == "Singleplayer" then
+                GAMEMODE = "Multiplayer"
+            else
+                GAMEMODE = "Singleplayer"
+            end
+        end
+    )
+    table.insert(self.buttons, button)
 
     -- Create background Xs and Os
     self.backgroundXs = {}
@@ -68,35 +115,38 @@ function Splashscreen:draw()
     end
 
     love.graphics.setFont(love.graphics.newFont(16))
-    love.graphics.print("Press 's' for singleplayer or 'm' for multiplayer", WINDOWDIMENSIONS[1] / 2 - WINDOWDIMENSIONS[1] * 0.25, WINDOWDIMENSIONS[2] / 2 + 100)
-    love.graphics.print(GAMEMODE, WINDOWDIMENSIONS[1] / 2 - WINDOWDIMENSIONS[1] * 0.25, WINDOWDIMENSIONS[2] / 2 + 150)
-    --Board width change text 
-    love.graphics.print("Press '1' for 3x3 board, '2' for 4x4 board, '3' for 5x5 board", WINDOWDIMENSIONS[1] / 2 - WINDOWDIMENSIONS[1] * 0.25, WINDOWDIMENSIONS[2] / 2 + 200)
-    love.graphics.print(BOARDWIDTH, WINDOWDIMENSIONS[1] / 2 - WINDOWDIMENSIONS[1] * 0.25, WINDOWDIMENSIONS[2] / 2 + 250)
+
+    for _, button in ipairs(self.buttons) do
+        button:draw()
+    end
+end
+
+function Splashscreen:mousepressed(x, y, button)
+    for _, button in ipairs(self.buttons) do
+        button:mousepressed(x, y, button)
+    end
 end
 
 function Splashscreen:update(dt)
     if love.keyboard.isDown("space") then
         GAMESTATE = "playing"
     end
-    if love.keyboard.isDown("s") then
-        GAMEMODE = "Singleplayer"
+    -- If escape is pressed, quit the game
+    if love.keyboard.isDown("escape") then
+        --Save the game state
+        SAVEGAME()
+        love.event.quit()
+        
     end
-    if love.keyboard.isDown("m") then
-        GAMEMODE = "Multiplayer"
+
+
+    for _, button in ipairs(self.buttons) do
+        button:update(dt)
+        if button.text == "Singleplayer" or button.text == "Multiplayer" then
+            button.text = GAMEMODE
+        end
     end
-    if love.keyboard.isDown("1") and BOARDWIDTH ~= 3 then
-        BOARDWIDTH = 3
-        RESETGAMEWIDTH()
-    end
-    if love.keyboard.isDown("2") and BOARDWIDTH ~= 4 then
-        BOARDWIDTH = 4
-        RESETGAMEWIDTH()
-    end
-    if love.keyboard.isDown("3") and BOARDWIDTH ~= 5 then
-        BOARDWIDTH = 5
-        RESETGAMEWIDTH()
-    end
+   
     
 
     -- Blinking for the title text

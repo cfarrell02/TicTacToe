@@ -4,27 +4,107 @@ local class = require("pl.class")
 -- Define the TicTacToe class
 local TicTacToe = class.TicTacToe()
 
+local Button = require("button")
+
 function TicTacToe:_init(boardSize)
     self.boardSize = boardSize or 3
     self.board = {}
     self.playerOne = "X"
     self.playerTwo = "O"
+    self.moveList = {}
+    self.completeMoveList = {}
     self.score = { X = 0, O = 0 }
     self.currentPlayer = self.playerOne
+    self.buttons = {}
+
+    -- undo button
+    local undo = Button(
+        20, -- x
+        WINDOWDIMENSIONS[2] - 60, -- y
+        100, -- width
+        50, -- height
+        "Undo", -- text
+        love.graphics.newFont(16), -- font
+        {0.58, 0.78, 0.92, 1}, -- light blue color
+        {0.31, 0, 0.4, 1}, -- hoverColor
+        {0.67, 0.63, 0.95, 1}, -- clickColor
+        function()
+            self:undoLastMove()
+        end
+    )
+    table.insert(self.buttons, undo)
+
+    -- redo button
+    local redo = Button(
+        WINDOWDIMENSIONS[1] - 120, -- x
+        WINDOWDIMENSIONS[2] - 60, -- y
+        100, -- width
+        50, -- height
+        "Redo", -- text
+        love.graphics.newFont(16), -- font
+        {0.58, 0.78, 0.92, 1}, -- light blue color
+        {0.31, 0, 0.4, 1}, -- hoverColor
+        {0.67, 0.63, 0.95, 1}, -- clickColor
+        function()
+            self:redoLastMove()
+        end
+    )
+    table.insert(self.buttons, redo)
+
 end
 
 function TicTacToe:reset()
     self.board = {}
     self.currentPlayer = self.playerOne
+    self.moveList = {}
+    self.completeMoveList = {}
 end
 
 function TicTacToe:resetScores()
     self.score = { X = 0, O = 0 }
 end
 
+function TicTacToe:undoMove(row, col)
+    if self.board[row] and self.board[row][col] then
+        self.board[row][col] = nil
+        self:switchPlayer()
+        return true
+    else
+        return false
+    end
+end
+
+function TicTacToe:undoLastMove()
+    if #self.moveList > 0 then
+        local row, col = unpack(self.moveList[#self.moveList])
+        self:undoMove(row, col)
+        table.remove(self.moveList, #self.moveList)
+        SETSCREENTEXT(string.format("Undone %s's move", self.currentPlayer))
+        return true
+    else
+        return false
+    end
+end
+
+function TicTacToe:redoLastMove()
+    if #self.moveList < #self.completeMoveList then
+        local row, col = unpack(self.completeMoveList[#self.moveList + 1])
+        self.board[row][col] = self.currentPlayer
+        self:switchPlayer()
+        table.insert(self.moveList, { row, col })
+        SETSCREENTEXT(string.format("Redone %s's move", self.currentPlayer))
+        return true
+    else
+        return false
+    end
+end
+
+
+
 function TicTacToe:makeMove(row, col)
     --Do not make move if AI move is pending
     if GAMEMODE == "Singleplayer" and self.currentPlayer == self.playerTwo and love.timer.getTime() < self.aiMoveTime then
+        SETSCREENTEXT("AI move pending")
         return false
     end
 
@@ -35,8 +115,11 @@ function TicTacToe:makeMove(row, col)
     if not self.board[row][col] and (self.currentPlayer == self.playerOne or self.currentPlayer == self.playerTwo) then
         self.board[row][col] = self.currentPlayer
         self:switchPlayer()
+        table.insert(self.moveList, { row, col })
+        table.insert(self.completeMoveList, { row, col })
         return true
     else
+        SETSCREENTEXT("Invalid move!")
         return false
     end
 end
@@ -88,6 +171,8 @@ function TicTacToe:makeAIMove()
     self.board[row] = self.board[row] or {}
     self.board[row][col] = self.currentPlayer
     self:switchPlayer()
+    table.insert(self.moveList, { row, col })
+    table.insert(self.completeMoveList, { row, col })
     return true
 end
 
@@ -217,6 +302,19 @@ end
             end
         end
     end
+
+    -- Check if the mouse is hovering over a tile
+    local row = math.floor((love.mouse.getY() - padding) / tileWidth) + 1
+    local col = math.floor((love.mouse.getX() - padding) / tileWidth) + 1
+    local rowCoords = padding + (row - 1) * tileWidth
+    local colCoords = padding + (col - 1) * tileWidth
+    if row and col and row >= 1 and row <= BOARDWIDTH and col >= 1 and col <= BOARDWIDTH then
+        highlightBox(colCoords, rowCoords, tileWidth, tileWidth, { 1, 1, 1, 0.2 })
+    end
+
+    for _, button in ipairs(self.buttons) do
+        button:draw()
+    end
 end
 
 function TicTacToe:update(dt)
@@ -224,6 +322,15 @@ function TicTacToe:update(dt)
         if love.timer.getTime() >= self.aiMoveTime then
             self:makeAIMove()
         end
+    end
+    for _, button in ipairs(self.buttons) do
+        button:update(dt)
+    end
+end
+
+function TicTacToe:mousepressed(x,y,button) 
+    for _, button in ipairs(self.buttons) do
+        button:mousepressed(x, y, button)
     end
 end
 
