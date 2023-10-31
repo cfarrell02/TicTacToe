@@ -16,7 +16,9 @@ function EventHandler:raise(eventName, eventPayload)
 end
 
 function EventHandler:printEventLog(eventName, eventPayload)
-    -- todo - print events
+    for i, event in ipairs(self.eventLog) do
+        print(event.name, event.payload)
+    end
 end
 
 return EventHandler

@@ -50,7 +50,6 @@ function love.update(dt)
         splashscreen:update(dt)
         return
     end
-    game:update(dt)
 
     if love.keyboard.isDown("escape") then
         GAMESTATE = "splashscreen"
@@ -61,6 +60,7 @@ function love.update(dt)
     end
 
     if GAMESTATE == "playing" then
+            game:update(dt)
             updateGame(dt)
         else if GAMESTATE == "gameover" then
             gameOverScreen:update(dt)
@@ -182,7 +182,6 @@ SAVEGAME = function ()
     file:write(game.score['X'] .. "\n")
     file:write(game.score['O'] .. "\n")
     file:write(game.currentPlayer .. "\n")
-    file:write(game.board .. "\n")
     file:close()
 end
 
@@ -197,7 +196,6 @@ LOADGAME = function ()
         game.score['X'] = tonumber(file:read())
         game.score['O'] = tonumber(file:read())
         game.currentPlayer = file:read()
-        game.board = file:read()
         file:close()
         scoreText = string.format("X: %d | O: %d", game.score['X'], game.score['O'])
         screenText = string.format("Player %s's turn", game.currentPlayer)

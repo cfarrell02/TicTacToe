@@ -116,7 +116,7 @@ function TicTacToe:makeMove(row, col)
         self.board[row][col] = self.currentPlayer
         self:switchPlayer()
         table.insert(self.moveList, { row, col })
-        table.insert(self.completeMoveList, { row, col })
+        self.completeMoveList = copyTable(self.moveList)
         return true
     else
         SETSCREENTEXT("Invalid move!")
@@ -146,6 +146,8 @@ function TicTacToe:makeAIMove()
         self.board[row][col] = self.currentPlayer
         if self:checkWin(self.currentPlayer) then
             self:switchPlayer()
+            table.insert(self.moveList, { row, col })
+            self.completeMoveList = copyTable(self.moveList)
             return true
         end
         self.board[row][col] = nil
@@ -160,6 +162,8 @@ function TicTacToe:makeAIMove()
         if self:checkWin(opponent) then
             self.board[row][col] = self.currentPlayer
             self:switchPlayer()
+            table.insert(self.moveList, { row, col })
+            self.completeMoveList = copyTable(self.moveList)
             return true
         end
         self.board[row][col] = nil
@@ -172,7 +176,7 @@ function TicTacToe:makeAIMove()
     self.board[row][col] = self.currentPlayer
     self:switchPlayer()
     table.insert(self.moveList, { row, col })
-    table.insert(self.completeMoveList, { row, col })
+    self.completeMoveList = copyTable(self.moveList)
     return true
 end
 
@@ -332,6 +336,14 @@ function TicTacToe:mousepressed(x,y,button)
     for _, button in ipairs(self.buttons) do
         button:mousepressed(x, y, button)
     end
+end
+
+function copyTable (t)
+    local t2 = {}
+    for k,v in pairs(t) do
+        t2[k] = v
+    end
+    return t2
 end
 
 return TicTacToe
