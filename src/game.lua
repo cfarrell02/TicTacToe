@@ -13,9 +13,14 @@ function TicTacToe:_init(boardSize)
     self.playerTwo = "O"
     self.moveList = {}
     self.completeMoveList = {}
-    self.score = { X = 0, O = 0 }
+    self.score = {  }	
+    self.score[self.playerOne] = 0
+    self.score[self.playerTwo] = 0
     self.currentPlayer = self.playerOne
     self.buttons = {}
+    self.backgroundColor = {0.208, 0.6, 0.941}
+    self.gameOverTimer = 0
+    self.gameOverDelay = 2 -- Adjust this value to set the delay in seconds
 
     -- undo button
     local undo = Button(
@@ -26,7 +31,7 @@ function TicTacToe:_init(boardSize)
         "Undo", -- text
         love.graphics.newFont(16), -- font
         {0.58, 0.78, 0.92, 1}, -- light blue color
-        {0.31, 0, 0.4, 1}, -- hoverColor
+        {0.196, 0.325, 0.62, 1}, -- hoverColor
         {0.67, 0.63, 0.95, 1}, -- clickColor
         function()
             self:undoLastMove()
@@ -43,7 +48,7 @@ function TicTacToe:_init(boardSize)
         "Redo", -- text
         love.graphics.newFont(16), -- font
         {0.58, 0.78, 0.92, 1}, -- light blue color
-        {0.31, 0, 0.4, 1}, -- hoverColor
+        {0.196, 0.325, 0.62, 1}, -- hoverColor
         {0.67, 0.63, 0.95, 1}, -- clickColor
         function()
             self:redoLastMove()
@@ -61,7 +66,9 @@ function TicTacToe:reset()
 end
 
 function TicTacToe:resetScores()
-    self.score = { X = 0, O = 0 }
+    self.score = {  }
+    self.score[self.playerOne] = 0
+    self.score[self.playerTwo] = 0
 end
 
 function TicTacToe:undoMove(row, col)
@@ -79,7 +86,7 @@ function TicTacToe:undoLastMove()
         local row, col = unpack(self.moveList[#self.moveList])
         self:undoMove(row, col)
         table.remove(self.moveList, #self.moveList)
-        SETSCREENTEXT(string.format("Undone %s's move", self.currentPlayer))
+        SetScreenText(string.format("Undone %s's move", self.currentPlayer))
         return true
     else
         return false
@@ -92,7 +99,7 @@ function TicTacToe:redoLastMove()
         self.board[row][col] = self.currentPlayer
         self:switchPlayer()
         table.insert(self.moveList, { row, col })
-        SETSCREENTEXT(string.format("Redone %s's move", self.currentPlayer))
+        SetScreenText(string.format("Redone %s's move", self.currentPlayer))
         return true
     else
         return false
@@ -104,7 +111,7 @@ end
 function TicTacToe:makeMove(row, col)
     --Do not make move if AI move is pending
     if GAMEMODE == "Singleplayer" and self.currentPlayer == self.playerTwo and love.timer.getTime() < self.aiMoveTime then
-        SETSCREENTEXT("AI move pending")
+        SetScreenText("AI move pending")
         return false
     end
 
@@ -119,7 +126,7 @@ function TicTacToe:makeMove(row, col)
         self.completeMoveList = copyTable(self.moveList)
         return true
     else
-        SETSCREENTEXT("Invalid move!")
+        SetScreenText("Invalid move!")
         return false
     end
 end
@@ -279,6 +286,15 @@ function TicTacToe:setPlayerIcons(playerOneIcon, playerTwoIcon)
     self.playerOne = playerOneIcon
     self.playerTwo = playerTwoIcon
     self:reset() -- should this be here or in the mod?
+    self:resetScores()
+end
+
+function TicTacToe:setTheme(theme)
+    if theme == "light" then
+        self.backgroundColor = {0.208, 0.6, 0.941}
+    elseif theme == "dark" then
+        self.backgroundColor = {0, 0.161, 0.302}
+    end
 end
 
 function TicTacToe:draw(padding, tileWidth)
@@ -295,25 +311,44 @@ end
     for i = 1, self.boardSize do
         for j = 1, self.boardSize do
             if self.board[i] and self.board[i][j] then
-                if self.board[i][j] == "X" then
-                    --Two lines to make an X
-                    love.graphics.line(padding + (j - 1) * tileWidth + 10, padding + (i - 1) * tileWidth + 10, padding + j * tileWidth - 10, padding + i * tileWidth - 10)
-                    love.graphics.line(padding + (j - 1) * tileWidth + 10, padding + i * tileWidth - 10, padding + j * tileWidth - 10, padding + (i - 1) * tileWidth + 10)
-                elseif self.board[i][j] == "O" then
-                    --Circle to make an O
-                    love.graphics.circle("line", padding + (j - 1) * tileWidth + tileWidth / 2, padding + (i - 1) * tileWidth + tileWidth / 2, tileWidth / 2 - 10)
-                end
+                local rowCoords = padding + (i - 1) * tileWidth
+                local colCoords = padding + (j - 1) * tileWidth
+                love.graphics.setColor(1, 1, 1)
+    
+                -- Calculate the scaling factor based on the tile size
+                local maxTextWidth = tileWidth * 0.6  -- Adjust this value as needed
+                local text = self.board[i][j]
+                local currentFontSize = love.graphics.getFont():getHeight()
+                local scale = math.min(maxTextWidth / love.graphics.getFont():getWidth(text), tileWidth / 4)
+    
+                -- Set the font size based on the calculated scale
+                love.graphics.setFont(love.graphics.newFont(currentFontSize * scale))
+    
+                -- Center the text within the tile
+                local textWidth = love.graphics.getFont():getWidth(text)
+                local textHeight = love.graphics.getFont():getHeight()
+                local textX = colCoords + (tileWidth - textWidth) / 2
+                local textY = rowCoords + (tileWidth - textHeight) / 2
+    
+                love.graphics.print(self.board[i][j], textX, textY)
             end
         end
     end
+    
+    
 
     -- Check if the mouse is hovering over a tile
     local row = math.floor((love.mouse.getY() - padding) / tileWidth) + 1
     local col = math.floor((love.mouse.getX() - padding) / tileWidth) + 1
     local rowCoords = padding + (row - 1) * tileWidth
     local colCoords = padding + (col - 1) * tileWidth
-    if row and col and row >= 1 and row <= BOARDWIDTH and col >= 1 and col <= BOARDWIDTH then
-        highlightBox(colCoords, rowCoords, tileWidth, tileWidth, { 1, 1, 1, 0.2 })
+    if row and col and row >= 1 and row <= self.boardSize and col >= 1 and col <= self.boardSize then
+        if not self.board[row] then
+            HighlightBox(colCoords, rowCoords, tileWidth, tileWidth, { 1, 1, 1, 0.2 })
+        elseif not self.board[row][col] then
+            HighlightBox(colCoords, rowCoords, tileWidth, tileWidth, { 1, 1, 1, 0.2 })
+        end
+        
     end
 
     for _, button in ipairs(self.buttons) do
@@ -329,6 +364,34 @@ function TicTacToe:update(dt)
     end
     for _, button in ipairs(self.buttons) do
         button:update(dt)
+    end
+
+    local winner = self:checkWin()
+
+
+    if winner then
+        SetScreenText(winner .. " wins!")
+        self.gameOverTimer = self.gameOverTimer + dt
+        if self.gameOverTimer >= self.gameOverDelay then
+            self.gameOverTimer = 0
+            ShowGameOverScreen(winner .. " wins!")
+            --eventHandler:raise("win", { winner = winner })
+            self:incrementScore(winner)
+            self:reset()
+            SetScoreText(string.format("%s: %d | %s: %d", self.playerOne, self.score[self.playerOne], self.playerTwo, self.score[self.playerTwo] ))
+            screenText = "Tic Tac Toe"
+        end
+
+    elseif self:isFull() then
+        screenText = "Draw!"
+        self.gameOverTimer = self.gameOverTimer + dt
+        if self.gameOverTimer >= self.gameOverDelay then
+            self.gameOverTimer = 0
+            ShowGameOverScreen("Draw!")
+            --eventHandler:raise("draw")
+            self:reset()
+            SetScreenText("Tic Tac Toe")
+        end
     end
 end
 

@@ -26,11 +26,11 @@ function Splashscreen:_init()
         string.format("Grid Size %s", i), -- text
         love.graphics.newFont(16), -- font
         {0.58, 0.78, 0.92, 1}, -- light blue color
-        {0.31, 0, 0.4, 1}, -- hoverColor
+        {0.196, 0.325, 0.62, 1}, -- hoverColor
         {0.67, 0.63, 0.95, 1}, -- clickColor
         function()
             if BOARDWIDTH ~= i then
-                RESETGAMEWIDTH(i)
+                ResetGameWidth(i)
             end
         end
     )
@@ -46,7 +46,7 @@ function Splashscreen:_init()
         GAMEMODE, -- text
         love.graphics.newFont(16), -- font
         {0.58, 0.78, 0.92, 1}, -- light blue color
-        {0.31, 0, 0.4, 1}, -- hoverColor
+        {0.196, 0.325, 0.62, 1}, -- hoverColor
         {0.67, 0.63, 0.95, 1}, -- clickColor
         function()
             if GAMEMODE == "Singleplayer" then
@@ -130,13 +130,6 @@ end
 function Splashscreen:update(dt)
     if love.keyboard.isDown("space") then
         GAMESTATE = "playing"
-    end
-    -- If escape is pressed, quit the game
-    if love.keyboard.isDown("escape") then
-        --Save the game state
-        SAVEGAME()
-        love.event.quit()
-        
     end
 
 
