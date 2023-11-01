@@ -40,19 +40,21 @@ Note, the above is guidance only.  Feel free to highlight where you feel you hav
 
 ## Setup Instructions
 
-Please fill in the following information and `commit` and `push`
-
 * Student Number: 20094046    
 * Name: Cian Farrell
 * GitHub username: cfarrell02
 
 ## Installing
 
-Maybe you could package the game?
+TODO: Package game in release section
 
 ### Lua
 
 Required Lua 5.4.6
+
+### Love2D
+
+This game runs on the Love2D game engine. It is required to run the game.
 
 ### Modules
 
@@ -65,24 +67,39 @@ luarocks install penlight
 To play:
 
 ```
-lua src/main.lua
+love ./src
 ```
 
-Maybe a self contained executable might help players get started
+Alternatively, precompiled versions of the game are available in the release section. Please download the latest one.
 
 ## Mods
 
-Let's get modding.
-
-Importantly, you should be able to add a mod without augmenting the source code.
-
-That said, as you have ideas for available mods you will likely update the source to create hook methods. So your players should be able to mod without augmenting the source.  Maybe the players don't even see the source.....
 
 ### ModPlayerIcons
 
-Available in `src/modPlayerIcons`.
+Available in `src/mods/modPlayerIcons`.
 
 Augments the icons used per player.
+
+### ModTheme
+
+Available in `src/mods/modTheme.lua`.
+
+Switches the game to a dark mode theme
+
+### ModBackgroundEffect
+
+Available in `src/mods/modBackgroundEffects.lua`.
+
+Changes the background of the game randomly every second
+
+### ModClickEffect
+
+Available in `src/mods/modClickEffects`.
+
+Changes the cursor to be a white circle.
+
+**More to come**
 
 
 ## Submission
