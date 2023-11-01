@@ -12,6 +12,8 @@ function TicTacToe:_init(boardSize)
     self.playerOne = "X"
     self.playerTwo = "O"
     self.moveList = {}
+    self.padding = 50
+    self.tileWidth = 200
     self.completeMoveList = {}
     self.score = {  }	
     self.score[self.playerOne] = 0
@@ -176,6 +178,16 @@ function TicTacToe:makeAIMove()
         self.board[row][col] = nil
     end
 
+    -- Place in the center if available
+    if not self.board[2] or (self.board[2] and not self.board[2][2]) then
+        self.board[2] = self.board[2] or {}
+        self.board[2][2] = self.currentPlayer
+        self:switchPlayer()
+        table.insert(self.moveList, { 2, 2 })
+        self.completeMoveList = copyTable(self.moveList)
+        return true
+    end
+
     -- If there are no winning or blocking moves, make a random move
     local randomIndex = love.math.random(1, #emptyCells)
     local row, col = unpack(emptyCells[randomIndex])
@@ -212,7 +224,7 @@ function TicTacToe:checkWin()
                 end
             end
             if rowWin then
-                return rowValue
+                return {winner = rowValue, row = i, direction = "horizontal"}
             end
         end
 
@@ -227,7 +239,7 @@ function TicTacToe:checkWin()
                 end
             end
             if colWin then
-                return colValue
+                return {winner = colValue, col = i, direction = "vertical"}
             end
         end
     end
@@ -243,7 +255,7 @@ function TicTacToe:checkWin()
             end
         end
         if diagWin1 then
-            return diagValue1
+            return {winner = diagValue1, direction = "diagonal", slope = 1}
         end
 
         local diagValue2 = self.board[1][self.boardSize]
@@ -255,7 +267,7 @@ function TicTacToe:checkWin()
             end
         end
         if diagWin2 then
-            return diagValue2
+            return {winner = diagValue2, direction = "diagonal", slope = -1}
         end
     end
 
@@ -354,6 +366,38 @@ end
     for _, button in ipairs(self.buttons) do
         button:draw()
     end
+
+    local winner = self:checkWin()
+    if winner then
+        self:drawWinningLine(winner)
+    end
+end
+
+function TicTacToe:drawWinningLine(win)
+
+    local padding = 50
+    local tileWidth = 200
+    local winType = win.direction
+    if winType == "horizontal" then
+        for i = 1, self.boardSize do
+        HighlightBox(padding, padding + (win.row - 1) * tileWidth, tileWidth * self.boardSize, tileWidth, { 1, 1, 1, 0.2 })
+        end
+    elseif winType == "vertical" then
+        for i = 1, self.boardSize do
+        HighlightBox(padding + (win.col - 1) * tileWidth, padding, tileWidth, tileWidth * self.boardSize, { 1, 1, 1, 0.2 })
+        end
+    elseif winType == "diagonal" then
+        if win.slope == 1 then
+            for i = 1, self.boardSize do
+                HighlightBox(padding + (i - 1) * tileWidth, padding + (i - 1) * tileWidth, tileWidth, tileWidth, { 1, 1, 1, 0.2 })
+            end
+        elseif win.slope == -1 then
+            for i = 1, self.boardSize do
+                HighlightBox(padding + (i - 1) * tileWidth, padding + (self.boardSize - i) * tileWidth, tileWidth, tileWidth, { 1, 1, 1, 0.2 })
+            end
+        end
+    end
+
 end
 
 function TicTacToe:update(dt)
@@ -370,8 +414,10 @@ function TicTacToe:update(dt)
 
 
     if winner then
+        winner = winner.winner
         SetScreenText(winner .. " wins!")
         self.gameOverTimer = self.gameOverTimer + dt
+        
         if self.gameOverTimer >= self.gameOverDelay then
             self.gameOverTimer = 0
             ShowGameOverScreen(winner .. " wins!")
@@ -394,6 +440,8 @@ function TicTacToe:update(dt)
         end
     end
 end
+
+
 
 function TicTacToe:mousepressed(x,y,button) 
     for _, button in ipairs(self.buttons) do

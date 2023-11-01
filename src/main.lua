@@ -11,17 +11,13 @@ local GameOverScreen = require("gameoverscreen")
 local ModEngine = require("modEngine")
 local socket = require('socket')
 
--- Game properties
-local padding = 50
-local tileWidth = 200
-local screenText = ""
-local scoreText = ""
-
 --Global variables
 BOARDWIDTH = 3
-WINDOWDIMENSIONS = { BOARDWIDTH * tileWidth + 100, BOARDWIDTH * tileWidth + 150 }
 GAMESTATE = "splashscreen"
 GAMEMODE = "Singleplayer"
+WINDOWDIMENSIONS = { BOARDWIDTH * 200 + 100, BOARDWIDTH * 200 + 150}
+
+
 
 
 -- Initialize game-related objects
@@ -30,16 +26,21 @@ local eventHandler = EventHandler()
 local splashscreen = Splashscreen()
 local gameOverScreen = GameOverScreen()
 local modEngine = ModEngine(game, splashscreen, gameOverScreen)
+local screenText = ""
+local scoreText = ""
+
+
 
 -- Love.load function
 function love.load(args)
-    modEngine:applyMods()
+    --modEngine:applyMods() -- Applying mods
+    WINDOWDIMENSIONS = { BOARDWIDTH * game.tileWidth + 100, BOARDWIDTH * game.tileWidth + 150 }
     love.window.setTitle("Tic Tac Toe")
     love.window.setMode(WINDOWDIMENSIONS[1], WINDOWDIMENSIONS[2], { resizable = false, vsync = false })
     love.graphics.setBackgroundColor(game.backgroundColor)
     SetScoreText(string.format("%s: %d | %s: %d", game.playerOne, game.score[game.playerOne], game.playerTwo, game.score[game.playerTwo] ))
     screenText = string.format("Player %s's turn", game.currentPlayer)
-    
+
 end
 
 
@@ -54,7 +55,6 @@ function love.update(dt)
 
     if love.keyboard.isDown("escape") then
         GAMESTATE = "splashscreen"
-        game:resetScores()
         game:reset()
         SetScoreText(string.format("%s: %d | %s: %d", game.playerOne, game.score[game.playerOne], game.playerTwo, game.score[game.playerTwo] ))
         screenText = string.format("Player %s's turn", game.currentPlayer)
@@ -71,6 +71,9 @@ end
 
 -- Love.draw function
 function love.draw()
+    -- Draw the score
+    love.graphics.setFont(love.graphics.newFont(16))
+    love.graphics.print(scoreText, WINDOWDIMENSIONS[1] / 2 - string.len(scoreText) * 4, 10)
     if GAMESTATE == "splashscreen" then
         splashscreen:draw()
         return
@@ -80,18 +83,13 @@ function love.draw()
         if GAMESTATE == "gameover"  then
             gameOverScreen:draw()
             return
-        else
-            game:draw(padding, tileWidth)
+        elseif GAMESTATE == "playing" then
+            game:draw(game.padding, game.tileWidth)
         end
+
+
         love.graphics.setFont(love.graphics.newFont(20))
         love.graphics.print(screenText, WINDOWDIMENSIONS[1] / 2 - string.len(screenText) * 6, WINDOWDIMENSIONS[2] - 50)
-
-        -- Draw the score
-        love.graphics.setFont(love.graphics.newFont(16))
-        love.graphics.print(scoreText, WINDOWDIMENSIONS[1] / 2 - string.len(scoreText) * 4, 10)
-
-
-
 
 end
 
@@ -102,8 +100,8 @@ function love.mousepressed(x, y, button, istouch, presses)
         game:mousepressed(x, y, button)
         
         if button == 1 then
-            local row = math.floor((y - padding) / tileWidth) + 1
-            local col = math.floor((x - padding) / tileWidth) + 1
+            local row = math.floor((y - game.padding) / game.tileWidth) + 1
+            local col = math.floor((x - game.padding) / game.tileWidth) + 1
 
             if row and col and row >= 1 and row <= BOARDWIDTH and col >= 1 and col <= BOARDWIDTH then
 
@@ -129,7 +127,7 @@ end
 --Global function for resetting game width
 function ResetGameWidth(width)
     BOARDWIDTH = width
-    WINDOWDIMENSIONS = { BOARDWIDTH * tileWidth + 100, BOARDWIDTH * tileWidth + 150 }
+    WINDOWDIMENSIONS = { BOARDWIDTH * game.tileWidth + 100, BOARDWIDTH * game.tileWidth + 150 }
     love.window.setMode(WINDOWDIMENSIONS[1], WINDOWDIMENSIONS[2], { resizable = false, vsync = false })
     game = TicTacToe(BOARDWIDTH)
     splashscreen = Splashscreen()
@@ -149,35 +147,59 @@ function HighlightBox(x, y, width, height, color)
     love.graphics.setColor(1, 1, 1)
 end
 
+
 function ShowGameOverScreen(text)
     gameOverScreen:show(text)
 end
 
 
 
--- SAVEGAME = function ()
---     local file = io.open("savegame.txt", "w")
---     file:write(BOARDWIDTH .. "\n")
---     file:write(GAMEMODE .. "\n")
---     file:write(game.score['X'] .. "\n")
---     file:write(game.score['O'] .. "\n")
---     file:write(game.currentPlayer .. "\n")
---     file:close()
--- end
+function SaveScores()
+    local file = io.open("scores.txt", "w")
+    file:write(string.format("%s,%d\n", game.playerOne, game.score[game.playerOne]))
+    file:write(string.format("%s,%d\n", game.playerTwo, game.score[game.playerTwo]))
+    file:close()
+end
 
--- LOADGAME = function ()
---     local file = io.open("savegame.txt", "r")
---     if file then
---         BOARDWIDTH = tonumber(file:read())
---         WINDOWDIMENSIONS = { BOARDWIDTH * tileWidth + 100, BOARDWIDTH * tileWidth + 150 }
---         love.window.setMode(WINDOWDIMENSIONS[1], WINDOWDIMENSIONS[2], { resizable = false, vsync = false })
---         game = TicTacToe(BOARDWIDTH)
---         GAMEMODE = file:read()
---         game.score['X'] = tonumber(file:read())
---         game.score['O'] = tonumber(file:read())
---         game.currentPlayer = file:read()
---         file:close()
---         scoreText = string.format("X: %d | O: %d", game.score['X'], game.score['O'])
---         screenText = string.format("Player %s's turn", game.currentPlayer)
---     end
--- end
+function LoadScores()
+    local file = io.open("scores.txt", "r")
+    if not file then
+        return false
+    end
+
+    local playerOne, playerTwo, scoreOne, scoreTwo
+
+    -- Read the first line (Player 1)
+    local line = file:read()
+    if not line then
+        file:close()
+        return false  -- Error reading the file
+    end
+    playerOne, scoreOne = string.match(line, "(.+),(.+)")
+    if not playerOne or not scoreOne then
+        file:close()
+        return false  -- Error parsing the line
+    end
+
+    -- Read the second line (Player 2)
+    line = file:read()
+    if not line then
+        file:close()
+        return false  -- Error reading the file
+    end
+    playerTwo, scoreTwo = string.match(line, "(.+),(.+)")
+    if not playerTwo or not scoreTwo then
+        file:close()
+        return false  -- Error parsing the line
+    end
+
+    -- Update the game data
+    game.playerOne = playerOne
+    game.playerTwo = playerTwo
+    game.score[playerOne] = tonumber(scoreOne)
+    game.score[playerTwo] = tonumber(scoreTwo)
+    game:reset()
+
+    file:close()
+    return true
+end

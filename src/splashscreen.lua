@@ -58,6 +58,38 @@ function Splashscreen:_init()
     )
     table.insert(self.buttons, button)
 
+    local saveButton = Button(
+        50, -- x
+        50, -- y
+        100, -- width
+        50, -- height
+        "Save", -- text
+        love.graphics.newFont(16), -- font
+        {0.58, 0.78, 0.92, 1}, -- light blue color
+        {0.196, 0.325, 0.62, 1}, -- hoverColor
+        {0.67, 0.63, 0.95, 1}, -- clickColor
+        function()
+            SaveScores()
+        end
+    )
+    table.insert(self.buttons, saveButton)
+
+    local loadButton = Button(
+        50, -- x
+        110, -- y
+        100, -- width
+        50, -- height
+        "Load", -- text
+        love.graphics.newFont(16), -- font
+        {0.58, 0.78, 0.92, 1}, -- light blue color
+        {0.196, 0.325, 0.62, 1}, -- hoverColor
+        {0.67, 0.63, 0.95, 1}, -- clickColor
+        function()
+            LoadScores()
+        end
+    )
+    table.insert(self.buttons, loadButton)
+
     -- Create background Xs and Os
     self.backgroundXs = {}
     self.backgroundOs = {}
