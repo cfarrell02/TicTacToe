@@ -158,48 +158,36 @@ function SaveScores()
     local file = io.open("scores.txt", "w")
     file:write(string.format("%s,%d\n", game.playerOne, game.score[game.playerOne]))
     file:write(string.format("%s,%d\n", game.playerTwo, game.score[game.playerTwo]))
+    file:write(string.format("%d\n", BOARDWIDTH))
     file:close()
 end
 
 function LoadScores()
     local file = io.open("scores.txt", "r")
-    if not file then
-        return false
-    end
+    if file then
+        local lines = {}
+        for line in file:lines() do
+            table.insert(lines, line)
+        end
 
-    local playerOne, playerTwo, scoreOne, scoreTwo
+        if #lines ~= 3 then
+            return
+        end
 
-    -- Read the first line (Player 1)
-    local line = file:read()
-    if not line then
-        file:close()
-        return false  -- Error reading the file
-    end
-    playerOne, scoreOne = string.match(line, "(.+),(.+)")
-    if not playerOne or not scoreOne then
-        file:close()
-        return false  -- Error parsing the line
-    end
+        -- Player 1
+        game.playerOne = string.sub(lines[1], 1, string.find(lines[1], ",") - 1)
+        game.score[game.playerOne] = tonumber(string.sub(lines[1], string.find(lines[1], ",") + 1))
 
-    -- Read the second line (Player 2)
-    line = file:read()
-    if not line then
-        file:close()
-        return false  -- Error reading the file
-    end
-    playerTwo, scoreTwo = string.match(line, "(.+),(.+)")
-    if not playerTwo or not scoreTwo then
-        file:close()
-        return false  -- Error parsing the line
-    end
+        -- Player 2
+        game.playerTwo = string.sub(lines[2], 1, string.find(lines[2], ",") - 1)
+        game.score[game.playerTwo] = tonumber(string.sub(lines[2], string.find(lines[2], ",") + 1))
 
-    -- Update the game data
-    game.playerOne = playerOne
-    game.playerTwo = playerTwo
-    game.score[playerOne] = tonumber(scoreOne)
-    game.score[playerTwo] = tonumber(scoreTwo)
-    game:reset()
+        SetScoreText(string.format("%s: %d | %s: %d", game.playerOne, game.score[game.playerOne], game.playerTwo, game.score[game.playerTwo] ))
 
-    file:close()
-    return true
+        -- Board width
+        
+        if BOARDWIDTH ~= tonumber(lines[3]) then
+            ResetGameWidth(tonumber(lines[3]))
+        end
+    end
 end
