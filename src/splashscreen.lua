@@ -90,6 +90,30 @@ function Splashscreen:_init()
     )
     table.insert(self.buttons, loadButton)
 
+    for i = 1, 2 do 
+        local y = 50 * i
+        if i == 2 then
+            y = 110
+        end
+        local enableDisableMods = Button(
+            WINDOWDIMENSIONS[1] - 150, -- x
+            y, -- y
+            100, -- width
+            50, -- height
+            i==1 and "Mods On" or "Mods Off", -- text
+            love.graphics.newFont(16), -- font
+            {0.58, 0.78, 0.92, 1}, -- light blue color
+            {0.196, 0.325, 0.62, 1}, -- hoverColor
+            {0.67, 0.63, 0.95, 1}, -- clickColor
+            function()
+                SetMods(i==1)
+            end
+        )
+        table.insert(self.buttons, enableDisableMods)
+    end
+
+
+
     -- Create background Xs and Os
     self.backgroundXs = {}
     self.backgroundOs = {}

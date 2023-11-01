@@ -15,4 +15,8 @@ function ModTheme:run()
     self.game:setTheme("dark")
 end
 
+function ModTheme:remove()
+    self.game:setTheme("light")
+end
+
 return ModTheme

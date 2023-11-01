@@ -20,6 +20,7 @@ WINDOWDIMENSIONS = { BOARDWIDTH * 200 + 100, BOARDWIDTH * 200 + 150}
 
 
 
+
 -- Initialize game-related objects
 local game = TicTacToe(BOARDWIDTH)
 local eventHandler = EventHandler()
@@ -33,14 +34,12 @@ local scoreText = ""
 
 -- Love.load function
 function love.load(args)
-    --modEngine:applyMods() -- Applying mods
     WINDOWDIMENSIONS = { BOARDWIDTH * game.tileWidth + 100, BOARDWIDTH * game.tileWidth + 150 }
-    love.window.setTitle("Tic Tac Toe")
+    love.window.setTitle(game.title)
     love.window.setMode(WINDOWDIMENSIONS[1], WINDOWDIMENSIONS[2], { resizable = false, vsync = false })
     love.graphics.setBackgroundColor(game.backgroundColor)
     SetScoreText(string.format("%s: %d | %s: %d", game.playerOne, game.score[game.playerOne], game.playerTwo, game.score[game.playerTwo] ))
     screenText = string.format("Player %s's turn", game.currentPlayer)
-
 end
 
 
@@ -74,14 +73,17 @@ function love.draw()
     -- Draw the score
     love.graphics.setFont(love.graphics.newFont(16))
     love.graphics.print(scoreText, WINDOWDIMENSIONS[1] / 2 - string.len(scoreText) * 4, 10)
+    
     if GAMESTATE == "splashscreen" then
         splashscreen:draw()
+        game:drawModElements()
         return
     end
 
         -- Draw the game board and elements
         if GAMESTATE == "gameover"  then
             gameOverScreen:draw()
+            game:drawModElements()
             return
         elseif GAMESTATE == "playing" then
             game:draw(game.padding, game.tileWidth)
@@ -90,6 +92,7 @@ function love.draw()
 
         love.graphics.setFont(love.graphics.newFont(20))
         love.graphics.print(screenText, WINDOWDIMENSIONS[1] / 2 - string.len(screenText) * 6, WINDOWDIMENSIONS[2] - 50)
+        game:drawModElements()
 
 end
 
@@ -128,9 +131,10 @@ end
 function ResetGameWidth(width)
     BOARDWIDTH = width
     WINDOWDIMENSIONS = { BOARDWIDTH * game.tileWidth + 100, BOARDWIDTH * game.tileWidth + 150 }
-    love.window.setMode(WINDOWDIMENSIONS[1], WINDOWDIMENSIONS[2], { resizable = false, vsync = false })
     game = TicTacToe(BOARDWIDTH)
     splashscreen = Splashscreen()
+    gameOverScreen = GameOverScreen()
+    love.window.setMode(WINDOWDIMENSIONS[1], WINDOWDIMENSIONS[2], { resizable = false, vsync = false })
 end
 
 function SetScreenText(text)
@@ -190,4 +194,23 @@ function LoadScores()
             ResetGameWidth(tonumber(lines[3]))
         end
     end
+end
+
+
+function SetMods(enabled)
+    if enabled then
+        -- Refresh everything
+        game = TicTacToe(BOARDWIDTH)
+        splashscreen = Splashscreen()
+        gameOverScreen = GameOverScreen()
+        modEngine = ModEngine(game, splashscreen, gameOverScreen)
+        modEngine:applyMods()
+    else
+        modEngine:removeMods()
+    end
+    love.window.setTitle(game.title)
+    love.window.setMode(WINDOWDIMENSIONS[1], WINDOWDIMENSIONS[2], { resizable = false, vsync = false })
+    love.graphics.setBackgroundColor(game.backgroundColor)
+    
+
 end

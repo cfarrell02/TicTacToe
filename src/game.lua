@@ -7,6 +7,7 @@ local TicTacToe = class.TicTacToe()
 local Button = require("button")
 
 function TicTacToe:_init(boardSize)
+    self.title = "Tic Tac Toe"
     self.boardSize = boardSize or 3
     self.board = {}
     self.playerOne = "X"
@@ -23,6 +24,8 @@ function TicTacToe:_init(boardSize)
     self.backgroundColor = {0.208, 0.6, 0.941}
     self.gameOverTimer = 0
     self.gameOverDelay = 2 -- Adjust this value to set the delay in seconds
+    -- Mod Functions to be called
+    self.modDrawFunctions = {}
 
     -- undo button
     local undo = Button(
@@ -58,6 +61,20 @@ function TicTacToe:_init(boardSize)
     )
     table.insert(self.buttons, redo)
 
+end
+
+function TicTacToe:registerModDrawFunction(func)
+    table.insert(self.modDrawFunctions, func)
+end
+
+function TicTacToe:clearModDrawFunctions()
+    self.modDrawFunctions = {}
+end
+
+function TicTacToe:drawModElements()
+    for _, func in ipairs(self.modDrawFunctions) do
+        func()
+    end
 end
 
 function TicTacToe:reset()
@@ -180,12 +197,26 @@ function TicTacToe:makeAIMove()
 
     -- Place in the center if available
     if not self.board[2] or (self.board[2] and not self.board[2][2]) then
-        self.board[2] = self.board[2] or {}
+        self.board[2] = self.board[2] or {} -- Create the row if it doesn't exist
         self.board[2][2] = self.currentPlayer
         self:switchPlayer()
         table.insert(self.moveList, { 2, 2 })
         self.completeMoveList = copyTable(self.moveList)
         return true
+    end
+
+    -- Place in a corner if available
+    local corners, counter = 4 , 1
+    for _, cell in ipairs(emptyCells) do
+        local row, col = unpack(cell)
+        if (row == 1 or row == self.boardSize) and (col == 1 or col == self.boardSize) then -- Check if the cell is a corner
+            self.board[row] = self.board[row] or {} -- Create the row if it doesn't exist
+            self.board[row][col] = self.currentPlayer 
+            self:switchPlayer()
+            table.insert(self.moveList, { row, col })
+            self.completeMoveList = copyTable(self.moveList)
+            return true
+        end
     end
 
     -- If there are no winning or blocking moves, make a random move

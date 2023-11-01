@@ -14,4 +14,8 @@ function ModPlayerIcons:run()
     self.game:setPlayerIcons("Me", "You")
 end
 
+function ModPlayerIcons:remove()
+    self.game:setPlayerIcons("X", "O")
+end
+
 return ModPlayerIcons
