@@ -95,11 +95,15 @@ Changes the background of the game randomly every second
 
 ### ModClickEffect
 
-Available in `src/mods/modClickEffects`.
+Available in `src/mods/modClickEffects.lua`.
 
 Changes the cursor to be a white circle.
 
-**More to come**
+### ModFunLabels
+
+Available in `src/mods/modFunLabels.lua`.
+
+Changes all text to be pirate themed, Y'arr!
 
 
 ## Submission
@@ -111,10 +115,10 @@ Each entry should be kept succinct.  Point to documentation where required. A ta
 
 |               | **Gameplay Mechanics** | **Modding Support** | **User Interface (UI)** | **Code Quality & Extensibility** | **Documentation and Distribution** |
 | ------------- | ---------------------- | ------------------- | ----------------------- | -------------------------------- | ---------------------------------- |
-| **Starter**   |    dwdwadawdawdaw                    |                     |                         |                                  |                                    |
-| **Basic**     |                        |                     |                         |                                  |                                    |
-| **Good**      |                        |                     |                         |                                  |                                    |
-| **Excellent** |                        |                     |                         |                                  |                                    |
+| **Starter**   |Game logic is fully implemented, wins/draws are recognised|Modding is possible with documentation in readme|Functional Love2D UI |Codebase exists|ReadMe Exists|
+| **Basic**     |Grid is selectable from splashscreen|Modding documentation and mods are available|Clear and intuitive Love2D interface|Codebase is reasonably organised into classes |ReadMe has been updated to guide developers on codebase. |
+| **Good**      |Undo, Redo and score tracking is available. Persistance is also available.|Modding is well documented and mostly seperate from source |Pretty splashscreen/gameover screen is available|Code is clear and concise, classes are used.|TODO|
+| **Excellent** |AI opponent with reasonable effectiveness |TODO|Modded themes are available.|TODO|Deployable artefacts are available...|
 
 
 ### Video Link
