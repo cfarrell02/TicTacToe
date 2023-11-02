@@ -28,7 +28,7 @@ local game = TicTacToe(BOARDWIDTH)
 local eventHandler = EventHandler()
 local splashscreen = Splashscreen()
 local gameOverScreen = GameOverScreen()
-local modEngine = ModEngine(game, splashscreen, gameOverScreen, LABELS)
+local modEngine = ModEngine(game, splashscreen, LABELS)
 local screenText = ""
 local scoreText = ""
 local notification = { text = "", duration = 0 }
@@ -237,8 +237,7 @@ function SetMods(enabled)
         --ResetGameWidth(BOARDWIDTH)
         game = TicTacToe(BOARDWIDTH)
         splashscreen = Splashscreen()
-        gameOverScreen = GameOverScreen()
-        modEngine = ModEngine(game, splashscreen, gameOverScreen, LABELS)
+        modEngine = ModEngine(game, splashscreen, LABELS)
         modEngine:applyMods()
     elseif not enabled and modsEnabled then
 
@@ -247,12 +246,12 @@ function SetMods(enabled)
         GAMEMODE = LABELS:getLabel("Singleplayer_Button_Label")
         game = TicTacToe(BOARDWIDTH)
         splashscreen = Splashscreen()
-        gameOverScreen = GameOverScreen()
         ResetGameWidth(BOARDWIDTH)
 
     end
     love.window.setTitle(LABELS:getLabel("Main_Title"))
     love.window.setMode(WINDOWDIMENSIONS[1], WINDOWDIMENSIONS[2], { resizable = false, vsync = false })
+    scoreText = string.format(LABELS:getLabel("Score_Text_Template"), game.playerOne, game.score[game.playerOne], game.playerTwo, game.score[game.playerTwo] )
     love.graphics.setBackgroundColor(game.backgroundColor)
     
 

@@ -4,11 +4,10 @@ local class = require("pl.class")
 -- Define the TicTacToe class
 local ModEngine = class.ModEngine()
 
-function ModEngine:_init(game, splashScreen, gameOverScreen, labels)
+function ModEngine:_init(game, splashScreen, labels)
     -- print(game)
     self.game = game
     self.splashScreen = splashScreen
-    self.gameOverScreen = gameOverScreen
     self.labels = labels
 end
 
@@ -22,7 +21,7 @@ function ModEngine:applyMods()
          -- remove .lua
         local modname = string.sub(file, 1, -5)
         local mod = require(inputdir .. "/" .. modname)
-        local moditem = mod(self.game, self.splashScreen, self.gameOverScreen, self.labels)
+        local moditem = mod(self.game, self.splashScreen, self.labels)
         if moditem.modType ~= "labels" then
             print("Activating mod: " .. modname .. " " .. moditem.modType)
             moditem:run()
@@ -38,7 +37,7 @@ function ModEngine:applyLabelMods()
          -- remove .lua
         local modname = string.sub(file, 1, -5)
         local mod = require(inputdir .. "/" .. modname)
-        local moditem = mod(self.game, self.splashScreen, self.gameOverScreen, self.labels)
+        local moditem = mod(self.game, self.splashScreen, self.labels)
         if moditem.modType == "labels" then
             print("Activating mod: " .. modname .. " " .. moditem.modType)
             moditem:run()

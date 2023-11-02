@@ -4,10 +4,9 @@ local class = require("pl.class")
 -- Define the TicTacToe class
 local ModTheme = class.ModTheme()
 
-function ModTheme:_init(game, splashScreen, gameOverScreen, label)
+function ModTheme:_init(game, splashScreen, label)
     self.game = game
     self.splashScreen = splashScreen
-    self.gameOverScreen = gameOverScreen
     self.modType = "theme"
 end
 

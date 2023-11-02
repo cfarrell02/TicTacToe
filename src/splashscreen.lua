@@ -8,7 +8,6 @@ local eventHandler = EventHandler()
 
 
 function Splashscreen:_init()
-    self.labels = labels
     self.animationTimer = 0
     self.blinkDuration = 1
     self.showText = true
