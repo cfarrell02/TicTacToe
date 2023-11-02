@@ -1,0 +1,24 @@
+Main_Title:Xs And Os!
+Main_Subtitle:Press Space To Begin
+Score_Text_Template:%s: %d | %s: %d
+Player_Turn_Template:Player %s's turn
+Save_Button_Label:Save
+Load_Button_Label:Load
+Enable_Mods_Button_Label:Mods On
+Disable_Mods_Button_Label:Mods Off
+Singleplayer_Button_Label:Singleplayer
+Multiplayer_Button_Label:Multiplayer
+GridSize_Button_Template:Grid Size %d
+Undo_Button_Label:Undo
+Redo_Button_Label:Redo
+Win_Text_Template:%s Wins!
+Draw_Text:Draw!
+Invalid_Move_Text:Invalid Move
+AI_Pending_Text:AI Move Pending
+Undone_Template:Undone %s's move
+Redone_Template:Redone %s's move
+Game_Over_Text:Game Over
+Game_Over_Subtitle_Text:Press Enter to play again
+Save_Notification_Text:Game Saved
+Load_Notification_Text:Game Loaded
+Incompatible_Save_Notification_Text:Modded saves are not compatible with non-modded games, and vice versa.

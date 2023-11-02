@@ -8,14 +8,12 @@ local eventHandler = EventHandler()
 
 
 function Splashscreen:_init()
-    self.titleText = "Tic Tac Toe"
+    self.labels = labels
     self.animationTimer = 0
     self.blinkDuration = 1
     self.showText = true
-    self.font = love.graphics.newFont(WINDOWDIMENSIONS[1] / 10)
-    self.titleX = (WINDOWDIMENSIONS[1] - self.font:getWidth(self.titleText)) / 2
-    self.titleY = (WINDOWDIMENSIONS[2] - self.font:getHeight()) / 2 - 50
     self.buttons = {}
+
 
     for i = 3, 5 do
     local button = Button(
@@ -23,7 +21,7 @@ function Splashscreen:_init()
         WINDOWDIMENSIONS[2] -90, -- y
         100, -- width
         50, -- height
-        string.format("Grid Size %s", i), -- text
+        string.format(LABELS:getLabel("GridSize_Button_Template"), i), -- text
         love.graphics.newFont(16), -- font
         {0.58, 0.78, 0.92, 1}, -- light blue color
         {0.196, 0.325, 0.62, 1}, -- hoverColor
@@ -49,10 +47,10 @@ function Splashscreen:_init()
         {0.196, 0.325, 0.62, 1}, -- hoverColor
         {0.67, 0.63, 0.95, 1}, -- clickColor
         function()
-            if GAMEMODE == "Singleplayer" then
-                GAMEMODE = "Multiplayer"
+            if GAMEMODE == LABELS:getLabel("Singleplayer_Button_Label") then
+                GAMEMODE = LABELS:getLabel("Multiplayer_Button_Label")
             else
-                GAMEMODE = "Singleplayer"
+                GAMEMODE = LABELS:getLabel("Singleplayer_Button_Label")
             end
         end
     )
@@ -63,12 +61,13 @@ function Splashscreen:_init()
         50, -- y
         100, -- width
         50, -- height
-        "Save", -- text
+        LABELS:getLabel("Save_Button_Label"), -- text
         love.graphics.newFont(16), -- font
         {0.58, 0.78, 0.92, 1}, -- light blue color
         {0.196, 0.325, 0.62, 1}, -- hoverColor
         {0.67, 0.63, 0.95, 1}, -- clickColor
         function()
+            DisplayNotification(LABELS:getLabel("Save_Notification_Text"), 2)
             SaveScores()
         end
     )
@@ -79,12 +78,13 @@ function Splashscreen:_init()
         110, -- y
         100, -- width
         50, -- height
-        "Load", -- text
+        LABELS:getLabel("Load_Button_Label"), -- text
         love.graphics.newFont(16), -- font
         {0.58, 0.78, 0.92, 1}, -- light blue color
         {0.196, 0.325, 0.62, 1}, -- hoverColor
         {0.67, 0.63, 0.95, 1}, -- clickColor
         function()
+            DisplayNotification(LABELS:getLabel("Load_Notification_Text"), 2)
             LoadScores()
         end
     )
@@ -100,7 +100,7 @@ function Splashscreen:_init()
             y, -- y
             100, -- width
             50, -- height
-            i==1 and "Mods On" or "Mods Off", -- text
+            i==1 and LABELS:getLabel("Enable_Mods_Button_Label") or LABELS:getLabel("Disable_Mods_Button_Label"), -- text
             love.graphics.newFont(16), -- font
             {0.58, 0.78, 0.92, 1}, -- light blue color
             {0.196, 0.325, 0.62, 1}, -- hoverColor
@@ -160,14 +160,12 @@ function Splashscreen:draw()
         end
     end
 
-    -- Draw the title text    
-        love.graphics.setFont(self.font)
-        love.graphics.print(self.titleText, self.titleX, self.titleY)
+    -- Draw the title text
+    DrawText(LABELS:getLabel("Main_Title"), WINDOWDIMENSIONS[1] / 5, WINDOWDIMENSIONS[1] / 2, WINDOWDIMENSIONS[2] / 2 - 100, WINDOWDIMENSIONS[1] * 0.5)
     
     --Blinking start text
     if self.showText then
-    love.graphics.setFont(love.graphics.newFont(WINDOWDIMENSIONS[1] / 20))
-    love.graphics.print("Press space to start", WINDOWDIMENSIONS[1] / 2 - WINDOWDIMENSIONS[1] * 0.25, WINDOWDIMENSIONS[2] / 2 + 50)
+    DrawText(LABELS:getLabel("Main_Subtitle"), WINDOWDIMENSIONS[1] / 15, WINDOWDIMENSIONS[1] / 2, WINDOWDIMENSIONS[2] / 2 + 50, WINDOWDIMENSIONS[1] * 0.5)
     end
 
     love.graphics.setFont(love.graphics.newFont(16))
@@ -191,7 +189,7 @@ function Splashscreen:update(dt)
 
     for _, button in ipairs(self.buttons) do
         button:update(dt)
-        if button.text == "Singleplayer" or button.text == "Multiplayer" then
+        if button.text == LABELS:getLabel("Singleplayer_Button_Label") or button.text == LABELS:getLabel("Multiplayer_Button_Label") then
             button.text = GAMEMODE
         end
     end
@@ -205,5 +203,8 @@ function Splashscreen:update(dt)
         self.showText = not self.showText
     end
 end
+
+
+
 
 return Splashscreen

@@ -4,14 +4,16 @@ local class = require("pl.class")
 -- Define the TicTacToe class
 local ModPlayerIcons = class.ModPlayerIcons()
 
-function ModPlayerIcons:_init(game, splashScreen, gameOverScreen)
+function ModPlayerIcons:_init(game, splashScreen, gameOverScreen, label)
     self.game = game
     self.splashScreen = splashScreen
     self.gameOverScreen = gameOverScreen
+    self.modType = "icon"
+
 end
 
 function ModPlayerIcons:run()
-    self.game:setPlayerIcons("Me", "You")
+    self.game:setPlayerIcons("Cpt'n X", "Ol' Salty O")
 end
 
 function ModPlayerIcons:remove()

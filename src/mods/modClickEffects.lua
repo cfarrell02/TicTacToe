@@ -4,10 +4,11 @@ local class = require("pl.class")
 -- Define the TicTacToe class
 local ModClickEffect = class.ModClickEffect()
 
-function ModClickEffect:_init(game, splashScreen, gameOverScreen)
+function ModClickEffect:_init(game, splashScreen, gameOverScreen, label)
     self.game = game
     self.splashScreen = splashScreen
     self.gameOverScreen = gameOverScreen
+    self.modType = "clickEffect"
     self.func =  function()
         local x = love.mouse.getX()
         local y = love.mouse.getY()

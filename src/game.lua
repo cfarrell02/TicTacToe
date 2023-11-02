@@ -7,7 +7,6 @@ local TicTacToe = class.TicTacToe()
 local Button = require("button")
 
 function TicTacToe:_init(boardSize)
-    self.title = "Tic Tac Toe"
     self.boardSize = boardSize or 3
     self.board = {}
     self.playerOne = "X"
@@ -33,7 +32,7 @@ function TicTacToe:_init(boardSize)
         WINDOWDIMENSIONS[2] - 60, -- y
         100, -- width
         50, -- height
-        "Undo", -- text
+        LABELS:getLabel("Undo_Button_Label"), -- text
         love.graphics.newFont(16), -- font
         {0.58, 0.78, 0.92, 1}, -- light blue color
         {0.196, 0.325, 0.62, 1}, -- hoverColor
@@ -50,7 +49,7 @@ function TicTacToe:_init(boardSize)
         WINDOWDIMENSIONS[2] - 60, -- y
         100, -- width
         50, -- height
-        "Redo", -- text
+        LABELS:getLabel("Redo_Button_Label"), -- text
         love.graphics.newFont(16), -- font
         {0.58, 0.78, 0.92, 1}, -- light blue color
         {0.196, 0.325, 0.62, 1}, -- hoverColor
@@ -105,7 +104,7 @@ function TicTacToe:undoLastMove()
         local row, col = unpack(self.moveList[#self.moveList])
         self:undoMove(row, col)
         table.remove(self.moveList, #self.moveList)
-        SetScreenText(string.format("Undone %s's move", self.currentPlayer))
+        SetScreenText(string.format(LABELS:getLabel("Undone_Template"), self.currentPlayer))
         return true
     else
         return false
@@ -118,7 +117,7 @@ function TicTacToe:redoLastMove()
         self.board[row][col] = self.currentPlayer
         self:switchPlayer()
         table.insert(self.moveList, { row, col })
-        SetScreenText(string.format("Redone %s's move", self.currentPlayer))
+        SetScreenText(string.format(LABELS:getLabel("Redone_Template"), self.currentPlayer))
         return true
     else
         return false
@@ -129,8 +128,8 @@ end
 
 function TicTacToe:makeMove(row, col)
     --Do not make move if AI move is pending
-    if GAMEMODE == "Singleplayer" and self.currentPlayer == self.playerTwo and love.timer.getTime() < self.aiMoveTime then
-        SetScreenText("AI move pending")
+    if GAMEMODE == LABELS:getLabel("Singleplayer_Button_Label") and self.currentPlayer == self.playerTwo and love.timer.getTime() < self.aiMoveTime then
+        SetScreenText(LABELS:getLabel("AI_Pending_Text"))
         return false
     end
 
@@ -145,7 +144,7 @@ function TicTacToe:makeMove(row, col)
         self.completeMoveList = copyTable(self.moveList)
         return true
     else
-        SetScreenText("Invalid move!")
+        SetScreenText(LABELS:getLabel("Invalid_Move_Text"))
         return false
     end
 end
@@ -233,7 +232,7 @@ end
 function TicTacToe:switchPlayer()
     if self.currentPlayer == self.playerOne then
         self.currentPlayer = self.playerTwo
-        if GAMEMODE == "Singleplayer" then
+        if GAMEMODE == LABELS:getLabel("Singleplayer_Button_Label") then
             -- Store the time when the AI should make a move
             self.aiMoveTime = love.timer.getTime() + 2
         end
@@ -432,7 +431,7 @@ function TicTacToe:drawWinningLine(win)
 end
 
 function TicTacToe:update(dt)
-    if GAMEMODE == "Singleplayer" and self.currentPlayer == self.playerTwo then
+    if GAMEMODE == LABELS:getLabel("Singleplayer_Button_Label") and self.currentPlayer == self.playerTwo then
         if love.timer.getTime() >= self.aiMoveTime then
             self:makeAIMove()
         end
@@ -446,28 +445,25 @@ function TicTacToe:update(dt)
 
     if winner then
         winner = winner.winner
-        SetScreenText(winner .. " wins!")
+        SetScreenText(string.format(LABELS:getLabel("Win_Text_Template"), winner))
         self.gameOverTimer = self.gameOverTimer + dt
         
         if self.gameOverTimer >= self.gameOverDelay then
             self.gameOverTimer = 0
-            ShowGameOverScreen(winner .. " wins!")
+            ShowGameOverScreen(string.format(LABELS:getLabel("Win_Text_Template"), winner))
             --eventHandler:raise("win", { winner = winner })
             self:incrementScore(winner)
             self:reset()
-            SetScoreText(string.format("%s: %d | %s: %d", self.playerOne, self.score[self.playerOne], self.playerTwo, self.score[self.playerTwo] ))
-            screenText = "Tic Tac Toe"
+            SetScoreText(string.format(LABELS:getLabel("Score_Text_Template"), self.playerOne, self.score[self.playerOne], self.playerTwo, self.score[self.playerTwo] ))
         end
 
     elseif self:isFull() then
-        screenText = "Draw!"
         self.gameOverTimer = self.gameOverTimer + dt
         if self.gameOverTimer >= self.gameOverDelay then
             self.gameOverTimer = 0
-            ShowGameOverScreen("Draw!")
+            ShowGameOverScreen(LABELS:getLabel("Draw_Text"))
             --eventHandler:raise("draw")
             self:reset()
-            SetScreenText("Tic Tac Toe")
         end
     end
 end

@@ -111,7 +111,7 @@ Each entry should be kept succinct.  Point to documentation where required. A ta
 
 |               | **Gameplay Mechanics** | **Modding Support** | **User Interface (UI)** | **Code Quality & Extensibility** | **Documentation and Distribution** |
 | ------------- | ---------------------- | ------------------- | ----------------------- | -------------------------------- | ---------------------------------- |
-| **Starter**   |                        |                     |                         |                                  |                                    |
+| **Starter**   |    dwdwadawdawdaw                    |                     |                         |                                  |                                    |
 | **Basic**     |                        |                     |                         |                                  |                                    |
 | **Good**      |                        |                     |                         |                                  |                                    |
 | **Excellent** |                        |                     |                         |                                  |                                    |

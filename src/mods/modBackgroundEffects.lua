@@ -4,10 +4,11 @@ local class = require("pl.class")
 -- Define the TicTacToe class
 local ModBackgroundEffect = class.ModBackgroundEffect()
 
-function ModBackgroundEffect:_init(game, splashScreen, gameOverScreen)
+function ModBackgroundEffect:_init(game, splashScreen, gameOverScreen, label)
     self.game = game
     self.splashScreen = splashScreen
     self.gameOverScreen = gameOverScreen
+    self.modType = "theme"
     self.delay = 1
     self.func = function()
         local r = math.random(0, 255) / 255

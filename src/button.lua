@@ -27,7 +27,7 @@ function Button:draw()
     end
     love.graphics.rectangle('fill', self.x, self.y, self.w, self.h, 10, 10)
     love.graphics.setColor(1, 1, 1)
-    love.graphics.printf(self.text, self.font, self.x, self.y + self.h / 2 - self.font:getHeight() / 2, self.w, 'center')
+    DrawText(self.text, self.font:getHeight(), self.x + self.w / 2 , self.y + self.h / 2, self.w - 20)
 end
 
 function Button:update(dt)

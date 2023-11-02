@@ -10,11 +10,13 @@ local Splashscreen = require("splashscreen")
 local GameOverScreen = require("gameoverscreen")
 local ModEngine = require("modEngine")
 local socket = require('socket')
+local Label = require("labels")
 
 --Global variables
+LABELS = Label("labels.txt")
 BOARDWIDTH = 3
 GAMESTATE = "splashscreen"
-GAMEMODE = "Singleplayer"
+GAMEMODE = LABELS:getLabel("Singleplayer_Button_Label")
 WINDOWDIMENSIONS = { BOARDWIDTH * 200 + 100, BOARDWIDTH * 200 + 150}
 
 
@@ -26,20 +28,22 @@ local game = TicTacToe(BOARDWIDTH)
 local eventHandler = EventHandler()
 local splashscreen = Splashscreen()
 local gameOverScreen = GameOverScreen()
-local modEngine = ModEngine(game, splashscreen, gameOverScreen)
+local modEngine = ModEngine(game, splashscreen, gameOverScreen, LABELS)
 local screenText = ""
 local scoreText = ""
+local notification = { text = "", duration = 0 }
+local modsEnabled = false
 
 
 
 -- Love.load function
 function love.load(args)
     WINDOWDIMENSIONS = { BOARDWIDTH * game.tileWidth + 100, BOARDWIDTH * game.tileWidth + 150 }
-    love.window.setTitle(game.title)
+    love.window.setTitle(LABELS:getLabel("Main_Title"))
     love.window.setMode(WINDOWDIMENSIONS[1], WINDOWDIMENSIONS[2], { resizable = false, vsync = false })
     love.graphics.setBackgroundColor(game.backgroundColor)
-    SetScoreText(string.format("%s: %d | %s: %d", game.playerOne, game.score[game.playerOne], game.playerTwo, game.score[game.playerTwo] ))
-    screenText = string.format("Player %s's turn", game.currentPlayer)
+    SetScoreText(string.format(LABELS:getLabel("Score_Text_Template"), game.playerOne, game.score[game.playerOne], game.playerTwo, game.score[game.playerTwo] ))
+    screenText = string.format(LABELS:getLabel("Player_Turn_Template"), game.currentPlayer)
 end
 
 
@@ -55,8 +59,8 @@ function love.update(dt)
     if love.keyboard.isDown("escape") then
         GAMESTATE = "splashscreen"
         game:reset()
-        SetScoreText(string.format("%s: %d | %s: %d", game.playerOne, game.score[game.playerOne], game.playerTwo, game.score[game.playerTwo] ))
-        screenText = string.format("Player %s's turn", game.currentPlayer)
+        SetScoreText(string.format(LABELS:getLabel("Score_Text_Template"), game.playerOne, game.score[game.playerOne], game.playerTwo, game.score[game.playerTwo] ))
+        screenText = string.format(LABELS:getLabel("Player_Turn_Template"), game.currentPlayer)
     end
 
     if GAMESTATE == "playing" then
@@ -66,6 +70,10 @@ function love.update(dt)
         end
     end
     
+    if notification.duration > 0 then
+        notification.duration = notification.duration - dt
+    end
+
 end
 
 -- Love.draw function
@@ -76,23 +84,22 @@ function love.draw()
     
     if GAMESTATE == "splashscreen" then
         splashscreen:draw()
-        game:drawModElements()
-        return
+        -- Draw the game board and elements
+    elseif GAMESTATE == "gameover"  then
+        gameOverScreen:draw()
+    elseif GAMESTATE == "playing" then
+        game:draw(game.padding, game.tileWidth)
+        DrawText(screenText, 16, WINDOWDIMENSIONS[1] / 2, WINDOWDIMENSIONS[2] - 30, WINDOWDIMENSIONS[1] * 0.5)
     end
 
-        -- Draw the game board and elements
-        if GAMESTATE == "gameover"  then
-            gameOverScreen:draw()
-            game:drawModElements()
-            return
-        elseif GAMESTATE == "playing" then
-            game:draw(game.padding, game.tileWidth)
-        end
+    -- Draw the notification
+    if notification.duration > 0 then
+        DrawText(notification.text, 10, WINDOWDIMENSIONS[1]/2 , WINDOWDIMENSIONS[2] -10, WINDOWDIMENSIONS[1] * 0.5)
+        notification.duration = notification.duration - love.timer.getDelta()
+    end
 
 
-        love.graphics.setFont(love.graphics.newFont(20))
-        love.graphics.print(screenText, WINDOWDIMENSIONS[1] / 2 - string.len(screenText) * 6, WINDOWDIMENSIONS[2] - 50)
-        game:drawModElements()
+    game:drawModElements()
 
 end
 
@@ -110,7 +117,7 @@ function love.mousepressed(x, y, button, istouch, presses)
 
                 if game:makeMove(row, col) then
                     eventHandler:raise("move", { col = col, row = row, valid = true })
-                    screenText = string.format("Player %s's turn", game.currentPlayer)
+                    screenText = string.format(LABELS:getLabel("Player_Turn_Template"), game.currentPlayer)
                     winner = game:checkWin()
                 else
                     eventHandler:raise("move", { col = col, row = row, valid = false })
@@ -123,10 +130,6 @@ function love.mousepressed(x, y, button, istouch, presses)
     end
 end
 
-
-
-
-
 --Global function for resetting game width
 function ResetGameWidth(width)
     BOARDWIDTH = width
@@ -134,6 +137,10 @@ function ResetGameWidth(width)
     game = TicTacToe(BOARDWIDTH)
     splashscreen = Splashscreen()
     gameOverScreen = GameOverScreen()
+    if modsEnabled then
+        SetMods(true)
+    end
+    SetScoreText(string.format(LABELS:getLabel("Score_Text_Template"), game.playerOne, game.score[game.playerOne], game.playerTwo, game.score[game.playerTwo] ))
     love.window.setMode(WINDOWDIMENSIONS[1], WINDOWDIMENSIONS[2], { resizable = false, vsync = false })
 end
 
@@ -163,6 +170,7 @@ function SaveScores()
     file:write(string.format("%s,%d\n", game.playerOne, game.score[game.playerOne]))
     file:write(string.format("%s,%d\n", game.playerTwo, game.score[game.playerTwo]))
     file:write(string.format("%d\n", BOARDWIDTH))
+    file:write(string.format("%s\n", modsEnabled and "true" or "false"))
     file:close()
 end
 
@@ -174,7 +182,14 @@ function LoadScores()
             table.insert(lines, line)
         end
 
-        if #lines ~= 3 then
+        if #lines ~= 4 then
+            return
+        end
+
+
+        --Check if mods were enabled
+        if lines[4] ~= (modsEnabled and "true" or "false") then
+            DisplayNotification(LABELS:getLabel("Incompatible_Save_Notification_Text"), 2)
             return
         end
 
@@ -186,7 +201,7 @@ function LoadScores()
         game.playerTwo = string.sub(lines[2], 1, string.find(lines[2], ",") - 1)
         game.score[game.playerTwo] = tonumber(string.sub(lines[2], string.find(lines[2], ",") + 1))
 
-        SetScoreText(string.format("%s: %d | %s: %d", game.playerOne, game.score[game.playerOne], game.playerTwo, game.score[game.playerTwo] ))
+        SetScoreText(string.format(LABELS:getLabel("Score_Text_Template"), game.playerOne, game.score[game.playerOne], game.playerTwo, game.score[game.playerTwo] ))
 
         -- Board width
         
@@ -196,19 +211,47 @@ function LoadScores()
     end
 end
 
+function DrawText(text, fontSize, x, y, maxWidth)
+    love.graphics.setFont(love.graphics.newFont(fontSize))
+    local maxTextWidth = maxWidth or WINDOWDIMENSIONS[1]
+    local currentFont = love.graphics.getFont():getHeight()
+    local scale = math.min(maxTextWidth / love.graphics.getFont():getWidth(text), 1)
+    love.graphics.setFont(love.graphics.newFont(currentFont * scale))
+    
+    local width = love.graphics.getFont():getWidth(text)
+    love.graphics.print(text, x - width / 2, y - love.graphics.getFont():getHeight() / 2)
+end
+
+function DisplayNotification(text, duration)
+    notification.text = text
+    notification.duration = duration
+end
+
 
 function SetMods(enabled)
-    if enabled then
+    if enabled and not modsEnabled then
         -- Refresh everything
+        modsEnabled = true
+        modEngine:applyLabelMods()
+        GAMEMODE = LABELS:getLabel("Singleplayer_Button_Label")
+        --ResetGameWidth(BOARDWIDTH)
         game = TicTacToe(BOARDWIDTH)
         splashscreen = Splashscreen()
         gameOverScreen = GameOverScreen()
-        modEngine = ModEngine(game, splashscreen, gameOverScreen)
+        modEngine = ModEngine(game, splashscreen, gameOverScreen, LABELS)
         modEngine:applyMods()
-    else
+    elseif not enabled and modsEnabled then
+
+        modsEnabled = false
         modEngine:removeMods()
+        GAMEMODE = LABELS:getLabel("Singleplayer_Button_Label")
+        game = TicTacToe(BOARDWIDTH)
+        splashscreen = Splashscreen()
+        gameOverScreen = GameOverScreen()
+        ResetGameWidth(BOARDWIDTH)
+
     end
-    love.window.setTitle(game.title)
+    love.window.setTitle(LABELS:getLabel("Main_Title"))
     love.window.setMode(WINDOWDIMENSIONS[1], WINDOWDIMENSIONS[2], { resizable = false, vsync = false })
     love.graphics.setBackgroundColor(game.backgroundColor)
     

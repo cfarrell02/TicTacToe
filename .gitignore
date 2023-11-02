@@ -42,3 +42,7 @@ luac.out
 
 # Save files
 */scores.txt
+
+# OS generated files #
+######################
+.DS_Store*
