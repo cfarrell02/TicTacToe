@@ -221,9 +221,8 @@ Each entry should be kept succinct.  Point to documentation where required. A ta
 
 ### Video Link
 
-Part 1 (or video 1): Gameplay & features 
-Part 2 (or video 2): Modding
-Video Link:
+Part 1 (or video 1): https://youtu.be/OVr5p3agC3E
+Part 2 (or video 2): https://youtu.be/j6-4VaE3kY0
 
 ### Checklist
 

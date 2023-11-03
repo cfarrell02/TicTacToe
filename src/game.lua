@@ -312,8 +312,8 @@ end
 
 
 function TicTacToe:isFull()
-    for i = 1, 3 do
-        for j = 1, 3 do
+    for i = 1, BOARDWIDTH do
+        for j = 1, BOARDWIDTH do
             if not self.board[i] or not self.board[i][j] then
                 return false
             end

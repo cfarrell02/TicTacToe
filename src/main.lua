@@ -122,8 +122,7 @@ function love.mousepressed(x, y, button, istouch, presses)
                 else
                     eventHandler:raise("move", { col = col, row = row, valid = false })
                 end
-            else
-            end
+                end
         end
     elseif GAMESTATE == "splashscreen" then
         splashscreen:mousepressed(x, y, button)
